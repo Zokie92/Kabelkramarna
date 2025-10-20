@@ -11,7 +11,4 @@ import sys
 
 socket.socket(socket.testing)
 
-
-
-if __name__ == "__main__":
-    pass
+    def ....
