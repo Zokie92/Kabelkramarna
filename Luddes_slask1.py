@@ -26,3 +26,14 @@ def check_port(host, port, timeout=3):
 
 # Testa på scanme.nmap.org, port 80
 check_port("scanme.nmap.org", 80)
+# Testa på localhost, port 9999
+check_port("localhost", 9999)
+#testa på localhost, port 22
+check_port("localhost", 22)
+#testa på localhost, port 444
+check_port("localhost", 444)
+#testa på localhost, port 8080
+check_port("localhost", 8080)
+#testa på localhost, port 3306
+check_port("localhost", 3306)
+
