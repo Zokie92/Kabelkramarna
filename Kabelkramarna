@@ -21,7 +21,6 @@ and result documentation all while emphasizing ethical and legal responsibility 
 import socket
 import sys
 
-socket.socket(socket.testing)
 
 print("Detta funkar förhoppningsvis.")
 
