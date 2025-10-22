@@ -2,15 +2,28 @@
 ### What im i doing? ####
 
 
-import socket
+import socket # Importerar socket-biblioteket för nätverkskommunikation
 
-test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+t_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Skapar en TCP/IP-socket
+socket.setdefaulttimeout(2) # Sätter en standard timeout på 2 sekunder för socket operationer   
+## Försöker ansluta till en specifik port på scanme.nmap.org
 
-try:
-    test_socket.connect(("scanme.nmap.org", 22))
-    print(f"Port is open!")
-except Exception as e:
-    print(f"Port is closed or unreachable: {e}")
-finally:
-    test_socket.close()
+
+try: ## Försöker ansluta
+    t_socket.connect(("scanme.nmap.org", 22)) # Försöker ansluta till scanme.nmap.org på port 22
+    print(f"Port is open!") # Om anslutningen lyckas, porten är öppen
+except Exception as e: # Om ett undantag inträffar
+    print(f"Port is closed or unreachable: {e}") # Fångar eventuella undantag och skriver ut felmeddelande
+finally: # Slutligen
+    t_socket.close() # Stänger socketen efter användning
+
+if __name__ == "__main__":
+    pass # Placeholder for future code or function calls
+
+### Mattias experiment ###
+print("Detta funkar förhoppningsvis.")
+
+
+
+ 
 
