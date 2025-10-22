@@ -5,11 +5,11 @@ def check_port(host, port, timeout=3):
     closed_ports = []
 
     try:
-        # Skapa en socket
+        # Create a socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
 
-        # Försök ansluta
+        # Try to connect
         result = sock.connect_ex((host, port))
         if result == 0:
             print(f"Port {port} på {host} är ÖPPEN.")
