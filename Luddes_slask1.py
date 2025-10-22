@@ -149,8 +149,22 @@ if __name__ == "__main__":
             return ("", str(e))
         finally:
             scan.close()
-            def id_protocol(tartget: str, port: int, timeout: float = 1.0) -> tuple[str, str]:
-                def scan_ports_with_service(target: str, port: int, timeout: float = 1.0) -> tuple[str, str]:
+    def id_protocol(tartget: str, port: int, timeout: float = 1.0) -> tuple[str, str]:
+                
+#   def scan_ports_with_service(target: str, port: int, timeout: float = 1.0) -> tuple[str, str]:
+        # Placeholder implementation to avoid syntax error
+        return ("", "unknown")
+        # Placeholder implementation to avoid syntax error
+        return ("", "unknown")
+    
+
+
+
+
+
+
+
+
     
 
 
