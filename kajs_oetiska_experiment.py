@@ -29,7 +29,7 @@ for port in range (20, 101): #### Här kan vi justera intervallet av portar som 
     scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # AF_INET avser IPv4-adresser --- SOCK_STREAM anger TCP som protokoll
     socket.setdefaulttimeout(1) # Timeout justeras i sekunder, variabeln 1 = 1 sekund
 
-    connection = scan_sock.connect_ex((target, port))
+    connection = scan_sock.connect_ex((target, port)) #### Target är i detta fallet scanme.nmap.org och port är portar i det valda intervallet
 
     if connection == 0:  #### Om porten är öppen
         open_ports.append(port) #### Lägg till port i listan open_ports
