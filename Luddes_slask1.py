@@ -246,10 +246,6 @@ def id_protocol(target: str, port: int, timeout: float = 1.0) -> tuple[str, str]
             guessed = "MongoDB"
         return (banner, guessed)
         
-# The following code block is invalid and should be removed because it is outside any function and contains misplaced return statements.
-# Remove this entire block to fix the syntax error.
-
-
 
 
     
