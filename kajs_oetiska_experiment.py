@@ -42,6 +42,8 @@ print(f"Scan complete. Open ports: {open_ports}") #### Printar lista över öppn
 
 """
 
+#### Port-Scanner som även identifierar tjänster för öppna portar
+
 import socket
 import time
 
