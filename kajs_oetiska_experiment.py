@@ -48,6 +48,7 @@ import socket
 import time
 
 def id_protocol(target: str, port: int, timeout: float = 2.0) -> (str, str):
+
     """"
     Denna funktion ska försöka läsa en banner från målets port och avgöra tjänsten.
     Retur: (banner:text, guessed_service) - banner_text kan vara '' om data inte hittats.
@@ -134,12 +135,22 @@ def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 
             result = scan_sock.connect_ex((target, port))
             if result == 0:
                 banner, service = id_protocol(target, port, timeout = 2.0)
+
+                ### PRINTA BARA ÖPPNA PORTAR
+                print(f"Port {port}: OPEN - {service} - Banner: {banner}")
+            
+
+            ### PRINTA ALLA SKANNADE PORTAR
+            """
                 if banner:
                     print(f"Port {port}: OPEN - {service} - Banner: {banner.splitlines()[0]}")
                 else:
                     print(f"Port {port}: OPEN - {service} - No banner received.")
             else:
                 print(f"Port {port}: CLOSED")
+
+            """
+        
         except Exception as e:
             print(f"Port {port}: ERROR - {e}")
         finally:
