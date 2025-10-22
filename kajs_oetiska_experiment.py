@@ -50,11 +50,11 @@ def id_protocol(target: str, port: int, timeout: float = 2.0) -> (str, str):
     Denna funktion ska försöka läsa en banner från målets port och avgöra tjänsten.
     Retur: (banner:text, guessed_service) - banner_text kan vara '' om data inte hittats.
     """
-    scan_sock = socket.socket(AF_INET, socket.SOCK_STREAM)
+    scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     scan_sock.settimeout(timeout)
 
     try:
-        result = scan_sock.connect_ex((taget, port))
+        result = scan_sock.connect_ex((target, port))
         if result != 0: #### 0 är lyckad anslutning och i detta fall är allt utom lyckad anslutning
             return ("", "unknown")
         
@@ -120,3 +120,31 @@ def id_protocol(target: str, port: int, timeout: float = 2.0) -> (str, str):
     finally:
         scan_sock.close()
 
+
+def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 1.0):
+
+    print(f"Scanning {target} in port range {start} to {end}... ")
+
+    for port in range(start, end + 1):
+        scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        scan_sock.settimeout(timeout)
+        try:
+            result = scan_sock.connect_ex((target, port))
+            if result == 0:
+                banner, service = id_protocol(target, port, timeout = 2.0)
+                if banner:
+                    print(f"Port {port}: OPEN - {service} - Banner: {banner.splitlines()[0]}")
+                else:
+                    print(f"Port {port}: OPEN - {service} - No banner received.")
+            else:
+                print(f"Port {port}: CLOSED")
+        except Exception as e:
+            print(f"Port {port}: ERROR - {e}")
+        finally:
+            scan_sock.close()
+
+
+if __name__ == "__main__":
+    
+    target_host = "scanme.nmap.org"
+    scan_ports_with_service(target_host, 20, 100, timeout = 1.0)
