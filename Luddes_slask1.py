@@ -45,9 +45,44 @@ if __name__ == "__main__":
 
     print(f"Öppna portar: {open_ports}")
     print(f"Stängda portar: {closed_ports}")
-
-
     
+    def id_protocol(target: str, port: int, timeout: float = 1.0) -> tuple[str, str]:
+        scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        scan_sock.settimeout(timeout)
+        try:
+            scan_sock.connect((target, port))
+            try:
+                banner = scan_sock.recv(1024).decode('utf-8', errors='ignore').strip()
+            except Exception:
+                banner = ""
+        except Exception:
+            # Could not connect; return unknown
+            return "unknown", ""
+        finally:
+            scan_sock.close()
+
+        banner_lower = banner.lower()
+        guessed = "unknown"
+        if "ssh-" in banner_lower or port == 22:
+            guessed = "SSH"
+        elif "http/" in banner_lower or "server:" in banner_lower or port in (80, 8080, 8000):
+            guessed = "HTTP"
+        elif banner_lower.startswith("220") or port == 25:
+            guessed = "FTP"
+        elif "ftp" in banner_lower or port == 21:
+            guessed = "FTP"
+        elif "imap" in banner_lower or port == 143:
+            guessed = "IMAP"
+        elif "pop3" in banner_lower or port == 110:
+            guessed = "POP3"
+        elif "mysql" in banner_lower or port == 3306:
+            guessed = "MySQL"
+        elif "postgres" in banner_lower or port == 5432:
+            guessed = "PostgreSQL"
+        elif "redis" in banner_lower or port == 6379:
+            guessed = "Redis"
+        
+
 
 
 
