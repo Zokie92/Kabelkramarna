@@ -24,20 +24,30 @@ def check_port(host, port, timeout=3):
     finally:
         sock.close()
 
+    connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if connection.connect_ex((host, port)) == 0:
+        open_ports.append(port)
+    else:
+        closed_ports.append(port)
+        connection.close()
+        return open_ports, closed_ports
+    
+
 # Testa på scanme.nmap.org, port 80
 check_port("scanme.nmap.org", 80)
 # Testa på localhost, port 9999
-check_port("localhost", 9999)
+check_port("scanme.nmap.org", 9999)
 #testa på localhost, port 22
-check_port("localhost", 22)
+check_port("scanme.nmap.org", 22)
 #testa på localhost, port 444
-check_port("localhost", 444)
+check_port("scanme.nmap.org", 444)
 #testa på localhost, port 8080
-check_port("localhost", 8080)
+check_port("scanme.nmap.org", 8080)
 #testa på localhost, port 3306
-check_port("localhost", 3306)
+check_port("scanme.nmap.org", 3306)
+#testa på localhost, port 5432
+check_port("scanme.nmap.org", 5432)
 
 
-#BAJSAPA!!!
 
 
