@@ -149,13 +149,24 @@ if __name__ == "__main__":
             return ("", str(e))
         finally:
             scan.close()
-    def id_protocol(tartget: str, port: int, timeout: float = 1.0) -> tuple[str, str]:
-                
-#   def scan_ports_with_service(target: str, port: int, timeout: float = 1.0) -> tuple[str, str]:
-        # Placeholder implementation to avoid syntax error
-        return ("", "unknown")
-        # Placeholder implementation to avoid syntax error
-        return ("", "unknown")
+def id_protocol(target: str, port: int, timeout: float = 1.0) -> tuple[str, str]:
+    scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    scan_sock.settimeout(timeout)
+    try:
+        scan_sock.connect((target, port))
+        try:
+            banner = scan_sock.recv(1024).decode('utf-8', errors='ignore').strip()
+        except Exception:
+            banner = ""
+        return (banner, "active")
+    except socket.timeout:
+        return ("", "timeout")
+    except Exception as e:
+        return ("", str(e))
+    finally:
+        scan_sock.close()
+        scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        scan_sock.settimeout(timeout)
     
 
 
