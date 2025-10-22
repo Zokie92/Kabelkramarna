@@ -57,7 +57,7 @@ if __name__ == "__main__":
                 banner = ""
         except Exception:
             # Could not connect; return unknown
-            return "unknown", ""
+            return ("", "unknown")
         finally:
             scan_sock.close()
 
@@ -84,15 +84,11 @@ if __name__ == "__main__":
         elif "mongodb" in banner_lower or port == 27017:
             guessed = "MongoDB"
 
+        # If we already guessed from the banner, return that result
+        if guessed != "unknown":
             return (banner, guessed)
-        return (banner, guessed)
-    try:
-        scan_sock.connect((target, port))
-        data = scan_sock.recv(1024)
-    except Exception:
-        # Could not connect; return unknown
-        return ("", "unknown")
-    else:
+
+        # Fallback: send lightweight probes for common ports to try to identify protocol
         probes = {
             80: b"GET / HTTP/1.0\r\n\r\n",
             443: b"GET / HTTP/1.0\r\n\r\n",
@@ -105,6 +101,41 @@ if __name__ == "__main__":
             6379: b"*1\r\n$4\r\nPING\r\n",
             27017: b"\x00",
         }
+
+        probe = probes.get(port)
+        if not probe:
+            return (banner, "unknown")
+
+        probe_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        probe_sock.settimeout(timeout)
+        try:
+            probe_sock.connect((target, port))
+            try:
+                probe_sock.sendall(probe)
+                data = probe_sock.recv(1024)
+                probe_resp = data.decode('utf-8', errors='ignore').lower()
+            except Exception:
+                probe_resp = ""
+        except Exception:
+            return (banner, "unknown")
+        finally:
+            probe_sock.close()
+
+        # analyze probe response
+        if "http/" in probe_resp or "server:" in probe_resp or "<html" in probe_resp:
+            guessed = "HTTP"
+        elif "ftp" in probe_resp or "220 " in probe_resp:
+            guessed = "FTP"
+        elif "mysql" in probe_resp:
+            guessed = "MySQL"
+        elif "postgres" in probe_resp or "postgresql" in probe_resp:
+            guessed = "PostgreSQL"
+        elif "redis" in probe_resp:
+            guessed = "Redis"
+        elif "mongodb" in probe_resp:
+            guessed = "MongoDB"
+
+        return (banner, guessed)
             
 
         
