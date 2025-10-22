@@ -37,3 +37,7 @@ check_port("localhost", 8080)
 #testa på localhost, port 3306
 check_port("localhost", 3306)
 
+
+#BAJSAPA!!!
+
+
