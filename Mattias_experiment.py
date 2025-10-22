@@ -1,6 +1,8 @@
 
 ### What im i doing? ####
+## Help ## This script attempts to connect to a specific port on a remote server (scanme.nmap.org) to check if the port is open or closed.
 
+"""
 
 import socket # Importerar socket-biblioteket för nätverkskommunikation
 
@@ -18,7 +20,7 @@ finally: # Slutligen
     c_socket.close() # Stänger socketen efter användning
 
 if __name__ == "__main__":
-    pass # 
+    pass 
 
 ### Mattias experiment ###
 print("Detta funkar förhoppningsvis.")
