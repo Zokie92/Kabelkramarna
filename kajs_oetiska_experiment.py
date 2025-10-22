@@ -23,15 +23,17 @@ target = "scanme.nmap.org"
 
 print(f"Scanning {target}...")
 
-for port in range (20, 101):
-    scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    socket.setdefaulttimeout(1) # Timeout set in seconds
+open_ports = [] #### Skapa en lista över öppna portar istället för att printa ut en efter en
+
+for port in range (20, 101): #### Här kan vi justera intervallet av portar som scannas
+    scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # AF_INET avser IPv4-adresser --- SOCK_STREAM anger TCP som protokoll
+    socket.setdefaulttimeout(1) # Timeout justeras i sekunder, variabeln 1 = 1 sekund
 
     connection = scan_sock.connect_ex((target, port))
 
-    if connection == 0:
-        print(f"Port {port}: OPEN")
-    else:
-        print(f"Port {port}: CLOSED")
+    if connection == 0:  #### Om porten är öppen
+        open_ports.append(port) #### Lägg till port i listan open_ports
 
-    scan_sock.close()
+    scan_sock.close() #### Stäng uppkopplingen
+
+print(f"Scan complete. Open porst: {open_ports}") #### Printar lista över öppna portar
