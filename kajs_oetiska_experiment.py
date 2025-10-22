@@ -18,6 +18,8 @@ finally:
 
 #### Port-Scanner för portintervall
 
+"""
+
 import socket
 target = "scanme.nmap.org"
 
@@ -36,5 +38,85 @@ for port in range (20, 101): #### Här kan vi justera intervallet av portar som 
 
     scan_sock.close() #### Stäng uppkopplingen
 
-print(f"Scan complete. Open porst: {open_ports}") #### Printar lista över öppna portar
+print(f"Scan complete. Open ports: {open_ports}") #### Printar lista över öppna portar
+
+"""
+
+import socket
+import time
+
+def id_protocol(target: str, port: int, timeout: float = 2.0) -> (str, str):
+    """"
+    Denna funktion ska försöka läsa en banner från målets port och avgöra tjänsten.
+    Retur: (banner:text, guessed_service) - banner_text kan vara '' om data inte hittats.
+    """
+    scan_sock = socket.socket(AF_INET, socket.SOCK_STREAM)
+    scan_sock.settimeout(timeout)
+
+    try:
+        result = scan_sock.connect_ex((taget, port))
+        if result != 0: #### 0 är lyckad anslutning och i detta fall är allt utom lyckad anslutning
+            return ("", "unknown")
+        
+        try:
+            data = scan_sock.recv(4096)
+        except socket.timeout:
+            data = b""
+
+        if not data:
+            probes = {
+                80: b"HEAD / HTTP/1.0\r\n\r\n",
+                8080: b"HEAD / HTTP/1.0\r\n\r\n",
+                8000: b"HEAD / HTTP/1.0\r\n\r\n",
+                443: b"HEAD / HTTP/1.0\r\n\r\n",
+                25: b"HELO example.com\r\n",
+                21: b"\r\n",
+                110: b"\r\n",
+                143: b"\r\n",
+            }
+
+            probe = probes.get(port, b"\r\n")
+            try:
+                scan_sock.sendall(probe)
+                time.sleep(0.2)
+                data = scan_sock.recv(4096)
+            except socket.timeout:
+                data = b""
+            except Exception:
+                data = b""
+
+
+        try:
+            banner = data.decode("utf-8", errors="ignore").strip()
+        except Exception:
+            banner = ""
+        
+        banner_lower = banner.lower()
+        guessed = "unknown"
+
+        if "ssh-" in banner_lower or port == 22:
+            guessed = "SSH"
+        elif "http/" in banner_lower or "server:" in banner_lower or port in (80, 8080, 8000):
+            guessed = "HTTP"
+        elif banner_lower.startswith("220") or port == 25:
+            guessed = "FTP"
+        elif "ftp" in banner_lower or port == 21:
+            guessed == "FTP"
+        elif "imap" in banner_lower or port == 143:
+            guessed = "IMAP"
+        elif "pop3" in banner_lower or port == 110:
+            guessed = "POP3"
+        elif "mysql" in banner_lower or port == 3306:
+            guessed = "MySQL"
+        elif "postgres" in banner_lower or port == 5432:
+            guessed = "PostgreSQL"
+        elif "redis" in banner_lower or port == 6379:
+            guessed = "Redis"
+        elif "mongodb" in banner_lower or port == 27017:
+            guessed = "MongoDB"
+
+        return (banner, guessed)
+
+    finally:
+        scan_sock.close()
 
