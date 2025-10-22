@@ -30,24 +30,26 @@ def check_port(host, port, timeout=3):
 
     return open_ports, closed_ports
 
+if __name__ == "__main__":
+    host = input("Ange värd (t.ex. 127.0.0.1 eller example.com): ")
+    start_port = int(input("Ange startport: "))
+    end_port = int(input("Ange slutport: "))
+
+    open_ports = []
+    closed_ports = []
+
+    for port in range(start_port, end_port + 1):
+        op, cp = check_port(host, port)
+        open_ports.extend(op)
+        closed_ports.extend(cp)
+
+    print(f"Öppna portar: {open_ports}")
+    print(f"Stängda portar: {closed_ports}")
+
 
     
 
-# Testa på scanme.nmap.org, port 80
 
-check_port("scanme.nmap.org", 80)
-# Testa på localhost, port 9999
-check_port("scanme.nmap.org", 9999)
-#testa på localhost, port 22
-check_port("scanme.nmap.org", 22)
-#testa på localhost, port 444
-check_port("scanme.nmap.org", 444)
-#testa på localhost, port 8080
-check_port("scanme.nmap.org", 8080)
-#testa på localhost, port 3306
-check_port("scanme.nmap.org", 3306)
-#testa på localhost, port 5432
-check_port("scanme.nmap.org", 5432)
 
 
 
