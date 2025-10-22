@@ -136,6 +136,30 @@ if __name__ == "__main__":
             guessed = "MongoDB"
 
         return (banner, guessed)
+    
+    def if_id_protocol(target: str, port: int, timeout: float = 1.0) -> tuple[str, str]:
+        scan = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        scan.settimeout(timeout)
+        try:
+            scan.connect((target, port))
+            return ("Connected", "active")
+        except socket.timeout:
+            return ("", "timeout")
+        except Exception as e:
+            return ("", str(e))
+        finally:
+            scan.close()
+            def id_protocol(tartget: str, port: int, timeout: float = 1.0) -> tuple[str, str]:
+                def scan_ports_with_service(target: str, port: int, timeout: float = 1.0) -> tuple[str, str]:
+    
+
+
+
+
+
+    
+
+
             
 
         
