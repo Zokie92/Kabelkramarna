@@ -81,6 +81,38 @@ if __name__ == "__main__":
             guessed = "PostgreSQL"
         elif "redis" in banner_lower or port == 6379:
             guessed = "Redis"
+        elif "mongodb" in banner_lower or port == 27017:
+            guessed = "MongoDB"
+
+            return (banner, guessed)
+        return (banner, guessed)
+    try:
+        scan_sock.connect((target, port))
+        data = scan_sock.recv(1024)
+    except Exception:
+        # Could not connect; return unknown
+        return ("", "unknown")
+    else:
+        probes = {
+            80: b"GET / HTTP/1.0\r\n\r\n",
+            443: b"GET / HTTP/1.0\r\n\r\n",
+            21: b"USER anonymous\r\n",
+            25: b"HELO example.com\r\n",
+            110: b"\r\n",
+            143: b"\r\n",
+            3306: b"\x00",
+            5432: b"\x00",
+            6379: b"*1\r\n$4\r\nPING\r\n",
+            27017: b"\x00",
+        }
+            
+
+        
+
+
+
+
+    
         
 
 
