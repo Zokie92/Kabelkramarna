@@ -1,9 +1,9 @@
-
-
-
 import socket
 
 def check_port(host, port, timeout=3):
+    open_ports = []
+    closed_ports = []
+
     try:
         # Skapa en socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -13,27 +13,28 @@ def check_port(host, port, timeout=3):
         result = sock.connect_ex((host, port))
         if result == 0:
             print(f"Port {port} på {host} är ÖPPEN.")
+            open_ports.append(port)
         else:
             print(f"Port {port} på {host} är STÄNGD eller otillgänglig.")
+            closed_ports.append(port)
     except socket.gaierror:
         print("Fel: Ogiltigt värdnamn.")
     except socket.timeout:
         print("Fel: Timeout – värden svarar inte.")
+        closed_ports.append(port)
     except Exception as e:
         print(f"Fel: {e}")
+        closed_ports.append(port)
     finally:
         sock.close()
 
-    connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    if connection.connect_ex((host, port)) == 0:
-        open_ports.append(port)
-    else:
-        closed_ports.append(port)
-        connection.close()
-        return open_ports, closed_ports
+    return open_ports, closed_ports
+
+
     
 
 # Testa på scanme.nmap.org, port 80
+
 check_port("scanme.nmap.org", 80)
 # Testa på localhost, port 9999
 check_port("scanme.nmap.org", 9999)
