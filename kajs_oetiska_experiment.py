@@ -37,3 +37,4 @@ for port in range (20, 101): #### Här kan vi justera intervallet av portar som 
     scan_sock.close() #### Stäng uppkopplingen
 
 print(f"Scan complete. Open porst: {open_ports}") #### Printar lista över öppna portar
+
