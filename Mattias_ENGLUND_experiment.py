@@ -30,7 +30,7 @@ Start date: 2025-10-22
 import socket  # Gör att vi kan skapa nätverksanslutningar
 
 # Lista med portar att kolla
-ports = [21, 22, 80, 443]
+ports = [22]
 
 # Funktion som kollar om en port är öppen
 def check_port(host, port):
@@ -43,11 +43,31 @@ def check_port(host, port):
         print(f"Port {port} är ÖPPEN på {host}")
     else:
         print(f"Port {port} är STÄNGD på {host}")
-
-# Huvudprogrammet
+# Testar funktionen på scanme.nmap.org
 host = "scanme.nmap.org"
 for port in ports:
-    check_port(host, port)
+    check_port(host, port)  
+
+
+#Steg två: Utöka koden för att kolla flera portar (1-100)
+def check_multiple_ports(host, start_port, end_port):   
+    for port in range(start_port, end_port + 1):
+        sock = socket.socket()
+        sock.settimeout(1)
+        result = sock.connect_ex((host, port))
+        sock.close()
+
+        if result == 0:
+            print(f"Port {port} är ÖPPEN på {host}")
+        else:
+            print(f"Port {port} är STÄNGD på {host}")
+# Testar funktionen på scanme.nmap.org för portar 22-100
+check_multiple_ports(host, 22, 100)
+
+
+
+
+
 
 
 
