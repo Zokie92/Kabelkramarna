@@ -1,26 +1,9 @@
-import socket # importerat från socket-biblioteket för nätverksanslutningar.
+import socket
 
-host = "scanme.nmap.org" # hostservern vi försöker ansluta till
-port = range(1, 101) # portnumret som testas - (80 - HTTP) 
-timeout_seconds = 1.0 # hur länge socket försöker ansluta innan den ger upp.
+host = "scanme.nmap.org"
+timeout_seconds = 2.0
 
-def portscan(port): # definerar en funktion "kollar upp åt mig"
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # använder ipv4 och TCP för en (pålitlig) överföring
-    s.settimeout(timeout_seconds) # sätter hur länge socket ska vänta på operation som connect.
-    try: # här börjas koden att köras under try: 
-        s.connect((host, 80)) #försöker öppna en TCP anslutning imot hosten och porten
-        return True # om connect lyckas så skickas svaret tillbaka som "true/ja, porten är öppen"
-    except Exception: # fångar alla fel/undantag som man uppstå under när vi försöker ansluta. 
-        return False # om ett fel inträffade så skickas det tillbaka som "false/nej, porten är stängd"
-    finally: # körs färdigt oavsett vad som händer.
-        s.close() #stänger anslutningen vi öppnade mot port 80
-
-if portscan(port): # om porten är öppen
-    print("öppen") # skriv öppen i terminalen
-else: # annars om
-    print("stängd") # skriv stängd i terminalen
-
-    def portscan(port):
+def portscan(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(timeout_seconds)
     try:
@@ -31,11 +14,45 @@ else: # annars om
     finally:
         s.close()
 
-for port in range(1, 101):
+# Steg 1: Kontroll av en enskild port (exempel port 80)
+if portscan(80):
+    print("Port 80: öppen")
+else:
+    print("Port 80: stängd")
+
+print("\nSkanning av portarna 1-100 hos scanme.nmap.org/:")
+# Steg 2: Skanning av portintervall
+open_ports = []
+for port in range(22, 101):
     if portscan(port):
         print(f"{port}: öppen")
+        open_ports.append(port)
     else:
         print(f"{port}: stängd")
 
+import socket
 
-    
+def try_banner(host, port, timeout=3):
+    probes = {80: b"HEAD / HTTP/1.0\r\n\r\n"}
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(timeout)
+        try:
+            s.connect((host, port))
+            probe = probes.get(port)
+            if probe:
+                s.sendall(probe)
+            data = s.recv(2048)
+            return data.decode(errors='ignore').strip()
+        except Exception:
+            return ""
+
+open_ports = [80]
+host = "scanme.nmap.org"
+
+for port in open_ports:
+    banner = try_banner(host, port)
+    if banner:
+        print(f"{port}: banner - {banner}")
+    else:
+        print(f"{port}: ingen banner mottagen")
+
