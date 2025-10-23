@@ -26,205 +26,59 @@ Start date: 2025-10-22
 - Vilket undantag/fel ger Python dig?
 - Varför behöver vi stänga socketen efter testning?
 """
-
+# Steg ett: Kolla en specifik port (22)
 import socket  # Gör att vi kan skapa nätverksanslutningar
 
 # Lista med portar att kolla
-ports = [21, 22, 80, 443]
+ports = [22]
 
-# Funktion som kollar om en port är öppen
+# Kollar om en port är öppen
 def check_port(host, port):
-    sock = socket.socket()              # Skapar en socket (standard = IPv4 + TCP)
-    sock.settimeout(1)                  # Väntar max 1 sekund
-    result = sock.connect_ex((host, port))  # Försöker ansluta (0 = öppen)
-    sock.close()                        # Stänger anslutningen
+    s = socket.socket()        # Skapar en "kontakt"
+    s.settimeout(1)            # Väntar max 1 sekund
+    result = s.connect_ex((host, port))  # Testar anslutning
+    s.close()                  # Stänger kontakten
 
-    if result == 0:
-        print(f"Port {port} är ÖPPEN på {host}")
+    if result == 0: # Porten är öppen
+        print(f"Port {port} är öppen på {host}") # ÖPPEN
     else:
-        print(f"Port {port} är STÄNGD på {host}")
-
-# Huvudprogrammet
-host = "scanme.nmap.org"
-for port in ports:
-    check_port(host, port)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        print(f"Port {port} är stängd på {host}") # STÄNGD
+
+# Test
+host = "scanme.nmap.org" # Mål att skanna
+ports = [22, 80, 443]  # Några vanliga portar
+for port in ports:  
+    check_port(host, port) # Kollar varje port i listan
+
+
+#Steg två: Utöka koden för att kolla flera portar (22-100)
+"""
+ Skannar portar i intervallet [start_port, end_port] 
+ på host och skriver ut om varje port är öppen eller stängd.
+ Exempel: check_multiple_ports("scanme.nmap.org", 22, 100)
+"""
+def check_multiple_ports(host: str, start_port: int, end_port: int, timeout: float = 1.0) -> None: # Skannar flera portar
+    try:
+        ip = socket.gethostbyname(host) # Hämta IP-adress från värdnamn
+    except socket.gaierror as e: # Felhantering för ogiltigt värdnamn
+        print(f"Kunde inte lösa host '{host}': {e}") 
+        return # Avbryt om värdnamnet är ogiltigt
+
+    for port in range(start_port, end_port + 1): # Loopar genom portintervallet
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock: # Skapar en TCP-socket
+            sock.settimeout(timeout) # Sätter timeout för anslutningen
+            if sock.connect_ex((ip, port)) == 0: # Försöker ansluta till porten
+                print(f"Port {port} är ÖPPEN på {host} ({ip})") # Porten är öppen
+            else:
+                print(f"Port {port} är STÄNGD på {host} ({ip})") # Porten är stängd
+
+# Exempel på användning
+if __name__ == "__main__": # Huvudprogram
+    target = "scanme.nmap.org" # Mål att skanna
+    check_multiple_ports(target, 22, 100, timeout=0.8) # Skannar portar 22-100
+
+
+# Steg tre: Försök hämta banner från öppna portar
 
 
 
