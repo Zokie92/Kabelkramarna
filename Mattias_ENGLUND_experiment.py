@@ -32,8 +32,6 @@ import socket  # Gör att vi kan skapa nätverksanslutningar
 # Lista med portar att kolla
 ports = [22]
 
-import socket  # För att prata med nätverket
-
 # Kollar om en port är öppen
 def check_port(host, port):
     s = socket.socket()        # Skapar en "kontakt"
