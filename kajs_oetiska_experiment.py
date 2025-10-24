@@ -179,6 +179,8 @@ def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 
                 print(f"Port {port}: ERROR - {e}")
             finally:
                 scan_sock.close()
+    
+    print("Scan complete...\nThank you for doing some really shady stuff with us.")
 
 
 if __name__ == "__main__":
