@@ -54,6 +54,7 @@ def check_port(host, port):
  på host och skriver ut om varje port är öppen eller stängd.
  Exempel: check_multiple_ports("scanme.nmap.org", 22, 100)
 """
+"""
 import socket
 
 def check_multiple_ports(host: str, start_port: int, end_port: int, timeout: float = 1.0) -> None: # Skannar flera portar
@@ -75,6 +76,8 @@ def check_multiple_ports(host: str, start_port: int, end_port: int, timeout: flo
 if __name__ == "__main__": # Huvudprogram
     target = "scanme.nmap.org" # Mål att skanna
     check_multiple_ports(target, 22, 100, timeout=0.8) # Skannar portar 22-100
+
+"""
 
 
 # Steg tre: Försök hämta banner från öppna portar
