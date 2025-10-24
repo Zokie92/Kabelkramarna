@@ -146,7 +146,7 @@ def id_protocol(target: str, port: int, timeout: float = 2.0) -> (str, str):
 
 def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 1.0):
 
-    print(f"Scanning {target} in port range {start} to {end}... ")
+    print(f"---- SCAN INITIATED ----\n \nScanning target: {target}\nPort range: {start} to {end}.\nTimeout set to: {timeout}\n \nScanning...\n")
 
     ### PRINTA BARA ÖPPNA PORTAR
     if presentation == "open":
