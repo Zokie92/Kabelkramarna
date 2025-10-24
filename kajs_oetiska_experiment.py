@@ -61,6 +61,7 @@ print(" ")
 print("Here we could use an input for you to decide what tagret host to scan....")
 print("But for obvious legal reasons our variable target_host is set to scanme.nmap.org")
 print(" ")
+
 start = int(input("Define port scan range from port (enter port number): "))
 end = int(input("To port: "))
 presentation = input("Type ALL to show result of every port or OPEN to only show open ports: ").lower().strip()
