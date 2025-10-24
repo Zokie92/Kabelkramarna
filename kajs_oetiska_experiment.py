@@ -62,6 +62,8 @@ print("Here we could use an input for you to decide what tagret host to scan....
 print("But for obvious legal reasons our variable target_host is set to scanme.nmap.org")
 print(" ")
 
+
+
 start = int(input("Define port scan range from port (enter port number): "))
 end = int(input("To port: "))
 presentation = input("Type ALL to show result of every port or OPEN to only show open ports: ").lower().strip()
@@ -193,4 +195,4 @@ def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 
 if __name__ == "__main__":
     
     target_host = "scanme.nmap.org"
-    scan_ports_with_service(target_host, start, end, timeout = 0.5)
+    scan_ports_with_service(target_host, start, end, timeout = 1)
