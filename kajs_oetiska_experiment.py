@@ -3,17 +3,21 @@
 """
 import socket
 
-socket.setdefaulttimeout(2)
+port_scan = int(input("Select a port to scan: "))
+    try:
+        socket.setdefaulttimeout(2)
 
-test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-try:
-    test_socket.connect(("scanme.nmap.org", 80))
-    print("Port is open.")
-except Exception as e:
-    print(f"Port is closed or unreachable: {e}")
-finally:
-    test_socket.close()
+        try:
+            test_socket.connect(("scanme.nmap.org", port_scan))
+            print("Port is open.")
+        except Exception as e:
+            print(f"Port is closed or unreachable: {e}")
+        finally:
+            test_socket.close()
+    except ValueError:
+        print("Invalid entry. Please select a numerical value.)
 """
 
 #### Port-Scanner för portintervall
@@ -42,6 +46,8 @@ print(f"Scan complete. Open ports: {open_ports}") #### Printar lista över öppn
 
 """
 
+
+
 #### Port-Scanner som även identifierar tjänster för öppna portar
 
 import socket
@@ -49,14 +55,16 @@ import time
 
 print(" ")
 print("##########################################################")
-print("###### Welcome to Kabelkramarnas fance Port-Scanner ######")
+print("###### Welcome to Kabelkramarnas fancy Port-Scanner ######")
 print("##########################################################")
 print(" ")
 print("Here we could use an input for you to decide what tagret host to scan....")
 print("But for obvious legal reasons our variable target_host is set to scanme.nmap.org")
 print(" ")
+
 start = int(input("Define port scan range from port (enter port number): "))
 end = int(input("To port: "))
+presentation = input("Type ALL to show result of every port or OPEN to only show open ports: ").lower().strip()
 
 
 def id_protocol(target: str, port: int, timeout: float = 2.0) -> (str, str):
@@ -138,35 +146,48 @@ def id_protocol(target: str, port: int, timeout: float = 2.0) -> (str, str):
 
 def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 1.0):
 
-    print(f"Scanning {target} in port range {start} to {end}... ")
+    print(f"\n---- SCAN INITIATED ----\n \nScanning target: {target}\nPort range: {start} to {end}.\nTimeout set to: {timeout}\n \nScanning...\n")
 
-    for port in range(start, end + 1):
-        scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        scan_sock.settimeout(timeout)
-        try:
-            result = scan_sock.connect_ex((target, port))
-            if result == 0:
-                banner, service = id_protocol(target, port, timeout = 2.0)
-
-                ### PRINTA BARA ÖPPNA PORTAR
-                print(f"Port {port}: OPEN - {service} - Banner: {banner}")
+    ### PRINTA BARA ÖPPNA PORTAR
+    if presentation == "open":
+        for port in range(start, end + 1):
+            scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            scan_sock.settimeout(timeout)
+            try:
+                result = scan_sock.connect_ex((target, port))
+                if result == 0:
+                    banner, service = id_protocol(target, port, timeout = 2.0)
+                    print(f"Port {port}: OPEN - {service} - Banner: {banner}")
+            except Exception as e:
+                    print(f"Port {port}: ERROR - {e}")
+            finally:
+                scan_sock.close()
             
-
-            ### PRINTA ALLA SKANNADE PORTAR
-            """
-                if banner:
-                    print(f"Port {port}: OPEN - {service} - Banner: {banner.splitlines()[0]}")
+    ### PRINTA ALLA SKANNADE PORTAR
+    elif presentation == "all":
+        for port in range(start, end + 1):
+            scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            scan_sock.settimeout(timeout)        
+            try:
+                result = scan_sock.connect_ex((target, port))
+                if result == 0:
+                    banner, service = id_protocol(target, port, timeout = 2.0)
+                    if banner:
+                        print(f"Port {port}: OPEN - {service} - Banner: {banner.splitlines()[0]}")
+                    else:
+                        print(f"Port {port}: OPEN - {service} - No banner received.")
                 else:
-                    print(f"Port {port}: OPEN - {service} - No banner received.")
-            else:
-                print(f"Port {port}: CLOSED")
-
-            """
-        
-        except Exception as e:
-            print(f"Port {port}: ERROR - {e}")
-        finally:
-            scan_sock.close()
+                    print(f"Port {port}: CLOSED")
+            except Exception as e:
+                print(f"Port {port}: ERROR - {e}")
+            finally:
+                scan_sock.close()
+    else:
+        print("Invalid entry.")
+    
+    print(" ")
+    print("Scan complete...\nThank you for doing some really shady stuff with us.")
+    print(" ")
 
 
 if __name__ == "__main__":
