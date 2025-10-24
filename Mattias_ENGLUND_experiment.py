@@ -81,8 +81,55 @@ if __name__ == "__main__": # Huvudprogram
 
 
 # Steg tre: Försök hämta banner från öppna portar
+### Steg 3: Tjänsteidentifiering (60 minuter)
+#**Mål:** När du hittar en öppen port, försök identifiera vilken TJÄNST som körs där.
+#**Utmaning:** Olika tjänster svarar olika när du ansluter till dem. Vissa tjänster skickar en "banner" som identifierar dem.
+#**Vad du behöver undersöka:**
+#1. Hur man tar emot data från en socket efter anslutning
+#2. Hur tjänster identifierar sig själva (banner grabbing)
+#3. Hur man hanterar tjänster som inte skickar data omedelbart
+#**Skapa en funktion som:**
+#- Ansluter till en öppen port
+#- Försöker ta emot bannern/hälsningen
+#- Identifierar vanliga tjänster (HTTP, SSH, FTP, etc.)
+#- OBS: Räcker att identifiera en tjänst
+#-**Tips:** Vissa tjänster behöver att du skickar data först innan de svarar!
 
 
+import socket
+import time
+
+def identify_service(host: str, port: int, timeout: float = 2.0) -> str:
+    """
+    Försöker identifiera tjänsten som körs på en given port genom att läsa dess banner.
+    Returnerar en sträng med tjänstens namn eller "Okänd tjänst" om den inte kan identifieras.
+    """
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(timeout)
+            sock.connect((host, port))
+            time.sleep(1)  # Vänta lite för att låta tjänsten skicka data
+            banner = sock.recv(1024).decode('utf-8', errors='ignore')  # Ta emot banner
+
+            # Enkel identifiering baserat på bannerinnehåll
+            if "HTTP" in banner:
+                return "HTTP"
+            elif "SSH" in banner:
+                return "SSH"
+            elif "FTP" in banner:
+                return "FTP"
+            elif "SMTP" in banner:
+                return "SMTP"
+            else:
+                return "Okänd tjänst"
+    except Exception as e:
+        return f"Fel vid identifiering: {e}"
+# Exempel på användning
+if __name__ == "__main__":
+    target = "scanme.nmap.org"
+    port_to_test = 22  # Testa port 22 (SSH)
+    service = identify_service(target, port_to_test)
+    print(f"Tjänsten på port {port_to_test} är: {service}")
 
 
 
