@@ -26,6 +26,7 @@ Start date: 2025-10-22
 - Vilket undantag/fel ger Python dig?
 - Varför behöver vi stänga socketen efter testning?
 """
+"""
 # Steg ett: Kolla en specifik port (22)
 import socket  # Gör att vi kan skapa nätverksanslutningar
 
@@ -44,11 +45,7 @@ def check_port(host, port):
     else:
         print(f"Port {port} är stängd på {host}") # STÄNGD
 
-# Test
-host = "scanme.nmap.org" # Mål att skanna
-ports = [22, 80, 443]  # Några vanliga portar
-for port in ports:  
-    check_port(host, port) # Kollar varje port i listan
+"""
 
 
 #Steg två: Utöka koden för att kolla flera portar (22-100)
@@ -57,6 +54,9 @@ for port in ports:
  på host och skriver ut om varje port är öppen eller stängd.
  Exempel: check_multiple_ports("scanme.nmap.org", 22, 100)
 """
+"""
+import socket
+
 def check_multiple_ports(host: str, start_port: int, end_port: int, timeout: float = 1.0) -> None: # Skannar flera portar
     try:
         ip = socket.gethostbyname(host) # Hämta IP-adress från värdnamn
@@ -76,6 +76,8 @@ def check_multiple_ports(host: str, start_port: int, end_port: int, timeout: flo
 if __name__ == "__main__": # Huvudprogram
     target = "scanme.nmap.org" # Mål att skanna
     check_multiple_ports(target, 22, 100, timeout=0.8) # Skannar portar 22-100
+
+"""
 
 
 # Steg tre: Försök hämta banner från öppna portar
