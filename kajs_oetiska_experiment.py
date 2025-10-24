@@ -147,24 +147,26 @@ def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 
 
     print(f"Scanning {target} in port range {start} to {end}... ")
 
-    for port in range(start, end + 1):
-        scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        scan_sock.settimeout(timeout)
-        
-        ### PRINTA BARA ÖPPNA PORTAR
-        if presentation == "open":
+    ### PRINTA BARA ÖPPNA PORTAR
+    if presentation == "open":
+        for port in range(start, end + 1):
+            scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            scan_sock.settimeout(timeout)
             try:
                 result = scan_sock.connect_ex((target, port))
                 if result == 0:
                     banner, service = id_protocol(target, port, timeout = 2.0)
                     print(f"Port {port}: OPEN - {service} - Banner: {banner}")
             except Exception as e:
-                print(f"Port {port}: ERROR - {e}")
+                    print(f"Port {port}: ERROR - {e}")
             finally:
                 scan_sock.close()
-        
-        ### PRINTA ALLA SKANNADE PORTAR
-        elif presentation == "all":
+            
+    ### PRINTA ALLA SKANNADE PORTAR
+    elif presentation == "all":
+        for port in range(start, end + 1):
+            scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            scan_sock.settimeout(timeout)        
             try:
                 result = scan_sock.connect_ex((target, port))
                 if result == 0:
@@ -179,8 +181,12 @@ def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 
                 print(f"Port {port}: ERROR - {e}")
             finally:
                 scan_sock.close()
+    else:
+        print("Invalid entry.")
     
+    print(" ")
     print("Scan complete...\nThank you for doing some really shady stuff with us.")
+    print(" ")
 
 
 if __name__ == "__main__":
