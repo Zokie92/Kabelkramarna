@@ -49,7 +49,7 @@ import time
 
 print(" ")
 print("##########################################################")
-print("###### Welcome to Kabelkramarnas fance Port-Scanner ######")
+print("###### Welcome to Kabelkramarnas fancy Port-Scanner ######")
 print("##########################################################")
 print(" ")
 print("Here we could use an input for you to decide what tagret host to scan....")
@@ -57,6 +57,7 @@ print("But for obvious legal reasons our variable target_host is set to scanme.n
 print(" ")
 start = int(input("Define port scan range from port (enter port number): "))
 end = int(input("To port: "))
+presentation = input("Type ALL to show result of every port or OPEN to only show open ports: ").lower().strip()
 
 
 def id_protocol(target: str, port: int, timeout: float = 2.0) -> (str, str):
@@ -144,6 +145,9 @@ def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 
         scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         scan_sock.settimeout(timeout)
         try:
+
+#### Kan man få in variabeln presentation här för att visa alla resultat eller bara öppna portar?
+
             result = scan_sock.connect_ex((target, port))
             if result == 0:
                 banner, service = id_protocol(target, port, timeout = 2.0)
