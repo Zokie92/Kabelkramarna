@@ -3,6 +3,10 @@ import socket #importera socket från bibiloteket för nätverksanslutningar.
 host = "scanme.nmap.org" # hostserverns namn.
 timeout_seconds = 2.0 # 2 sekund delay på scanningen.
 
+print(f"hej! här har du bara möjlighet att scanna en specifik port och i detta fallet är det port 80")
+if input("vill du göra detta? (ja/nej):").lower() != "ja":
+
+
 def portscan(port): # tilldela en funktion med (def) för portscan i detta fallet.
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # socker för (ipv4 och TCP).
     s.settimeout(timeout_seconds) # vi sätter en timeout delay för hinna scanna ordentligt.
