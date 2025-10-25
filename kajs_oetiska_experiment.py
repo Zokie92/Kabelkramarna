@@ -4,20 +4,20 @@
 import socket
 
 port_scan = int(input("Select a port to scan: "))
+try:
+    socket.setdefaulttimeout(2)
+
+    test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     try:
-        socket.setdefaulttimeout(2)
-
-        test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        try:
-            test_socket.connect(("scanme.nmap.org", port_scan))
-            print("Port is open.")
-        except Exception as e:
-            print(f"Port is closed or unreachable: {e}")
-        finally:
-            test_socket.close()
-    except ValueError:
-        print("Invalid entry. Please select a numerical value.)
+        test_socket.connect(("scanme.nmap.org", port_scan))
+        print("Port is open.")
+    except Exception as e:
+        print(f"Port is closed or unreachable: {e}")
+    finally:
+        test_socket.close()
+except ValueError:
+    print("Invalid entry. Please select a numerical value.")
 """
 
 #### Port-Scanner för portintervall
