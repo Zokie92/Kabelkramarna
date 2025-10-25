@@ -33,7 +33,7 @@ def try_banner(host, port, timeout_seconds):
 print("Välkommen till Niclas nätverksskanner-tjänst")
 if input("Vill du skanna port 80? (ja/nej) ").strip().lower() not in ("ja", "j"):
     sys.exit()
-start_time = time.time()
+
 
 open_ports = []
 if scan(80):
@@ -43,7 +43,7 @@ print("Port 80:", "ÖPPEN" if 80 in open_ports else "STÄNGD")
 if input("Vill du skanna portarna 22-80 också? (ja/nej) ").strip().lower() not in ("ja", "j"):
     print("\nResultat:")
     print("---------\n")
-print(f"Skannar {host} portar {start_port}-{end_port} med timeout {timeout_seconds}s…")
+print(f"Skannar {host} portar {start_port}-{end_port} med timeout {timeout_seconds}")
 
 for port in range(start_port, end_port + 1):
     if scan(port):
