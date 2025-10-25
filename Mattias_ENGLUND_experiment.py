@@ -47,16 +47,10 @@ print(CYAN + "Here we could use an input for you to decide what target host to s
 print(CYAN + "But for obvious legal reasons our variable target_host is set to scanme.nmap.org" + RESET)
 print()
 
-# Important warnings in green
-print(GREEN + "!! REMEMBER: Only scan hosts you own or have permission to scan !!" + RESET)
-print(GREEN + "!! NOTE: Type 'end', 'exit' or 'quit' to terminate the scan. !!" + RESET)
-print()
-
-
 def check_for_exit(s: str):
     """Exits the program if the user typed an exit command."""
     if s.lower() in ("end", "exit", "quit"):
-        print("Exiting the program — goodbye!")
+        print("Exiting the program — goodbye and thank your using our scanner tool!")
         sys.exit(0)
     return False
 
@@ -203,5 +197,5 @@ def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 
 if __name__ == "__main__":
     target_host = "scanme.nmap.org"
     scan_ports_with_service(target_host, start, ended, timeout = 1.0)
-    
+
 
