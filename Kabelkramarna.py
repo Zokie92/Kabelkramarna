@@ -21,6 +21,7 @@ and result documentation all while emphasizing ethical and legal responsibility 
 import socket
 import sys
 
+print("Scanning target: scanme.nmap.org...")
 port_scan = int(input("Select a port to scan: "))
 try:
     socket.setdefaulttimeout(2)
