@@ -1,45 +1,46 @@
-import socket #importera socket från bibiloteket för nätverksanslutningar.
+import socket, sys, time
 
-host = "scanme.nmap.org" # hostserverns namn.
-timeout_seconds = 2.0 # 2 sekund delay på scanningen.
+host = "scanme.nmap.org"
+start_port = 22
+end_port = 100
+timeout_seconds = 2
 
-print(f"hej! här har du bara möjlighet att scanna en specifik port och i detta fallet är det port 80")
-if input("vill du göra detta? (ja/nej):").lower() != "ja":
+def scan(port):
+    try:
+        s = socket.create_connection((host, port), timeout_seconds)
+        s.close()
+        return True
+    except:
+        return False
 
+print("välkommen till niclas portscan-tjänst")
+if input("vill du skanna port 80? (ja/nej) ").strip().lower() not in ("ja","j"):
+    sys.exit()
+print("Port 80:", "ÖPPEN" if scan(80) else "STÄNGD")
 
-def portscan(port): # tilldela en funktion med (def) för portscan i detta fallet.
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # socker för (ipv4 och TCP).
-    s.settimeout(timeout_seconds) # vi sätter en timeout delay för hinna scanna ordentligt.
-    try: # nu startar scriptet och vi försöker köra.
-        s.connect((host, port)) # ansluter till hosten och porten.
-        return True # om vi får anslutning
-    except Exception: # om något går fel så fångar vi up detta och förhindrar programmet att krascha helt oväntat.
-        return False # om vi inte får anslutning
-    finally: # slutet på scriptet oavsett vad.
-        s.close() # nu slutar anslutningen.
-# Steg 1: Kontroll av en enskild port (exempel port 80)
-if portscan(80): # om portscanen 80 lyckas eller inte
-    print("Port 80: öppen") #skrivs ut i terminalen
-else: # annars om
-    print("Port 80: stängd")# skrivs ut i terminalen 
+if input("vill du skanna portarna 22-100 också? (ja/nej) ").strip().lower() not in ("ja","j"):
+    print("Avslutar, ingen intervallskanning.")
+    sys.exit()
 
-print("\nSkanning av portarna 1-100 hos scanme.nmap.org/:") # skrivs ut i terminalen
+print(f"Skannar {host} portar {start_port}-{end_port} med timeout {timeout_seconds}s…")
 
-# Steg 2: Skanning av portintervall
-open_ports = [] #
-for port in range(22, 101): # portarna imellan 22 och 101 som vi vill scanna
-    if portscan(port): #
-        print(f"{port}: öppen") #
-        open_ports.append(port) #
+open_ports = []
+for port in range(start_port, end_port + 1):
+    if scan(port):
+        print(f"Port {port}: ÖPPEN")
+        open_ports.append(port)
     else:
-        print(f"{port}: stängd")
-# Steg 3: 
+        print(f"Port {port}: STÄNGD")
+
+print("Skanningen är klar!")
+print(f"De öppna portarna är: {open_ports}")
+# Steg 3:
 import socket # importera socket från bibiloteket för nätverksanslutningar.
 
-def try_banner(host, port, timeout=3):
+def try_banner(host, port, timeout_seconds):
     probes = {80: b"HEAD / HTTP/1.0\r\n\r\n"}
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.settimeout(timeout)
+        s.settimeout(timeout_seconds)
         try:
             s.connect((host, port))
             probe = probes.get(port)
@@ -54,7 +55,7 @@ open_ports = [80]
 host = "scanme.nmap.org"
 
 for port in open_ports:
-    banner = try_banner(host, port)
+    banner = try_banner(host, port, timeout_seconds)
     if banner:
         print(f"{port}: banner - {banner}")
     else:
