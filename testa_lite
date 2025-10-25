@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""
+Network Scanner Project
+Students: [Mattias E, Kaj, Ludde JM, Mattias L, Niclas F]
+Start date: [2025-10-20]
+"""
+
+import socket
+
+RESET = "\033[0m"
+BOLD = "\033[1m"
+CYAN = "\033[36m"
+
+width = 60
+
+def colored_banner():
+    print() 
+    print(BOLD + CYAN + "=" * width + RESET)
+    print() 
+    print("  ##  Kabelkramarnas Fancy Port Scanner  ## ".center(width) + RESET)
+    print() 
+    print(BOLD + CYAN + "=" * width + RESET)
+    print()  
+
+colored_banner()
+
+target = "scanme.nmap.org"
+socket.setdefaulttimeout(2)
+
+while True:
+    print(f"Scanning target: {target}...")
+    port_input = input("Select a port to scan (or 'exit' to quit): ")
+    
+    if port_input.lower() == "exit":
+        print("Exiting scanner. Goodbye!")
+        break
+
+    try:
+        port_scan = int(port_input)
+        test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
+        try:
+            test_socket.connect((target, port_scan)) 
+            print(f"Port {port_scan} is open.\n")
+        except Exception as e:
+            print(f"Port {port_scan} is closed or unreachable: {e}\n")
+        finally:
+            test_socket.close()
+    except ValueError:
+        print("Invalid entry. Please enter a numerical port.\n")
+    
+    again = input("Do you want to scan another port? (y/n): ")
+    if again.lower() != "y":
+        print("Exiting scanner. Goodbye!")
+        break
