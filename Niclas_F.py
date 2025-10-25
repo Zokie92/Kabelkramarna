@@ -1,9 +1,12 @@
-import socket, sys, time
+import socket
+import sys
+import time
 
 host = "scanme.nmap.org"
 start_port = 22
-end_port = 100
+end_port = 80
 timeout_seconds = 2
+
 
 def scan(port):
     try:
@@ -12,30 +15,6 @@ def scan(port):
         return True
     except:
         return False
-
-print("välkommen till niclas portscan-tjänst")
-if input("vill du skanna port 80? (ja/nej) ").strip().lower() not in ("ja","j"):
-    sys.exit()
-print("Port 80:", "ÖPPEN" if scan(80) else "STÄNGD")
-
-if input("vill du skanna portarna 22-100 också? (ja/nej) ").strip().lower() not in ("ja","j"):
-    print("Avslutar, ingen intervallskanning.")
-    sys.exit()
-
-print(f"Skannar {host} portar {start_port}-{end_port} med timeout {timeout_seconds}s…")
-
-open_ports = []
-for port in range(start_port, end_port + 1):
-    if scan(port):
-        print(f"Port {port}: ÖPPEN")
-        open_ports.append(port)
-    else:
-        print(f"Port {port}: STÄNGD")
-
-print("Skanningen är klar!")
-print(f"De öppna portarna är: {open_ports}")
-# Steg 3:
-import socket # importera socket från bibiloteket för nätverksanslutningar.
 
 def try_banner(host, port, timeout_seconds):
     probes = {80: b"HEAD / HTTP/1.0\r\n\r\n"}
@@ -48,16 +27,39 @@ def try_banner(host, port, timeout_seconds):
                 s.sendall(probe)
             data = s.recv(2048)
             return data.decode(errors='ignore').strip()
-        except Exception:
-            return ""
+        except:
+            return None
 
-open_ports = [80]
-host = "scanme.nmap.org"
+print("Välkommen till Niclas nätverksskanner-tjänst")
+if input("Vill du skanna port 80? (ja/nej) ").strip().lower() not in ("ja", "j"):
+    sys.exit()
+start_time = time.time()
 
+open_ports = []
+if scan(80):
+    open_ports.append(80)
+print("Port 80:", "ÖPPEN" if 80 in open_ports else "STÄNGD")
+
+if input("Vill du skanna portarna 22-80 också? (ja/nej) ").strip().lower() not in ("ja", "j"):
+    print("\nResultat:")
+    print("---------\n")
+print(f"Skannar {host} portar {start_port}-{end_port} med timeout {timeout_seconds}s…")
+
+for port in range(start_port, end_port + 1):
+    if scan(port):
+        print(f"Port {port}: ÖPPEN")
+        open_ports.append(port)
+    else:
+        print(f"Port {port}: STÄNGD")
+
+print("Skanningen är klar!")
+print(f"De öppna portarna är: {open_ports}")
+
+# Banner-grabbing för öppna portar
+print("\nBanner-resultat för öppna portar:")
 for port in open_ports:
     banner = try_banner(host, port, timeout_seconds)
     if banner:
         print(f"{port}: banner - {banner}")
     else:
         print(f"{port}: ingen banner mottagen")
-
