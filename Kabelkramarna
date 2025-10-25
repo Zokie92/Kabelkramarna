@@ -16,11 +16,30 @@ also practice error handling (timeouts, connection refused, OSError), performanc
 and result documentation all while emphasizing ethical and legal responsibility in network scanning.
 """
 
-
+########### STEG 1 ###########
 
 import socket
 import sys
 
+port_scan = int(input("Select a port to scan: "))
+try:
+    socket.setdefaulttimeout(2)
 
-print("Detta funkar förhoppningsvis.")
+    test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+    try:
+        test_socket.connect(("scanme.nmap.org", port_scan))
+        print("Port is open.")
+    except Exception as e:
+        print(f"Port is closed or unreachable: {e}")
+    finally:
+        test_socket.close()
+except ValueError:
+    print("Invalid entry. Please select a numerical value.")
+
+<<<<<<< HEAD
+########### STEG 2 ###########
+
+=======
+########### STEG 2 ###########
+>>>>>>> b5f0438e011fd023c049c2a580107d36432e4f21
