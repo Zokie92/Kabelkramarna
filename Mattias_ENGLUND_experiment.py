@@ -1,85 +1,7 @@
 
 
-## Help ## This script attempts to connect to a specific port on a remote server (scanme.nmap.org) to check if the port is open or closed.
-"""
-Mattias Experiment Script
-Student: Mattias E
-Start date: 2025-10-22
-"""     
-"""
-**Vanliga portar:**
-- Port 80: HTTP (webbplatser)
-- Port 443: HTTPS (säkra webbplatser)
-- Port 22: SSH (säker fjärråtkomst)
-- Port 21: FTP (filöverföring)
-**Mål:** Skapa ett program som kontrollerar om EN specifik port är öppen på EN målvärd.
-**Vad du behöver ta reda på:**
-1. Hur man importerar och använder Pythons `socket`-bibliotek
-2. Hur man skapar en socket-anslutning till en specifik IP-adress och port
-3. Hur man avgör om anslutningen lyckades eller misslyckades
-4. Hur man hanterar att anslutningen stängs ordentligt
-**Testa din kod på:**
-- `scanme.nmap.org`
-- Port 80
-**Frågor att diskutera i din grupp:**
-- Vad händer när du försöker ansluta till en stängd port?
-- Vilket undantag/fel ger Python dig?
-- Varför behöver vi stänga socketen efter testning?
-"""
-"""
-# Steg ett: Kolla en specifik port (22)
-import socket  # Gör att vi kan skapa nätverksanslutningar
-
-# Lista med portar att kolla
-ports = [22]
-
-# Kollar om en port är öppen
-def check_port(host, port):
-    s = socket.socket()        # Skapar en "kontakt"
-    s.settimeout(1)            # Väntar max 1 sekund
-    result = s.connect_ex((host, port))  # Testar anslutning
-    s.close()                  # Stänger kontakten
-
-    if result == 0: # Porten är öppen
-        print(f"Port {port} är öppen på {host}") # ÖPPEN
-    else:
-        print(f"Port {port} är stängd på {host}") # STÄNGD
-
-"""
-
-
-#Steg två: Utöka koden för att kolla flera portar (22-100)
-"""
- Skannar portar i intervallet [start_port, end_port] 
- på host och skriver ut om varje port är öppen eller stängd.
- Exempel: check_multiple_ports("scanme.nmap.org", 22, 100)
-"""
-"""
-import socket
-
-def check_multiple_ports(host: str, start_port: int, end_port: int, timeout: float = 1.0) -> None: # Skannar flera portar
-    try:
-        ip = socket.gethostbyname(host) # Hämta IP-adress från värdnamn
-    except socket.gaierror as e: # Felhantering för ogiltigt värdnamn
-        print(f"Kunde inte lösa host '{host}': {e}") 
-        return # Avbryt om värdnamnet är ogiltigt
-
-    for port in range(start_port, end_port + 1): # Loopar genom portintervallet
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock: # Skapar en TCP-socket
-            sock.settimeout(timeout) # Sätter timeout för anslutningen
-            if sock.connect_ex((ip, port)) == 0: # Försöker ansluta till porten
-                print(f"Port {port} är ÖPPEN på {host} ({ip})") # Porten är öppen
-            else:
-                print(f"Port {port} är STÄNGD på {host} ({ip})") # Porten är stängd
-
-# Exempel på användning
-if __name__ == "__main__": # Huvudprogram
-    target = "scanme.nmap.org" # Mål att skanna
-    check_multiple_ports(target, 22, 100, timeout=0.8) # Skannar portar 22-100
-
-"""
-
-
+# Steg ett ## This script attempts to connect to a specific port on a remote server (scanme.nmap.org) to check if the port is open or closed.
+# Steg två: Utöka koden för att kolla flera portar (22-100)
 # Steg tre: Försök hämta banner från öppna portar
 ### Steg 3: Tjänsteidentifiering (60 minuter)
 #**Mål:** När du hittar en öppen port, försök identifiera vilken TJÄNST som körs där.
@@ -95,78 +17,39 @@ if __name__ == "__main__": # Huvudprogram
 #- OBS: Räcker att identifiera en tjänst
 #-**Tips:** Vissa tjänster behöver att du skickar data först innan de svarar!
 
-"""
-import socket
-import time
-""" # def identify_service(host: str, port: int, timeout: float = 2.0) -> str:
-"""
-    Försöker identifiera tjänsten som körs på en given port genom att läsa dess banner.
-    Returnerar en sträng med tjänstens namn eller "Okänd tjänst" om den inte kan identifieras.
-    """
-"""
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.settimeout(timeout)
-            sock.connect((host, port))
-            time.sleep(1)  # Vänta lite för att låta tjänsten skicka data
-            banner = sock.recv(1024).decode('utf-8', errors='ignore')  # Ta emot banner
-
-            # Enkel identifiering baserat på bannerinnehåll
-            if "HTTP" in banner:
-                return "HTTP"
-            elif "SSH" in banner:
-                return "SSH"
-            elif "FTP" in banner:
-                return "FTP"
-            elif "SMTP" in banner:
-                return "SMTP"
-            else:
-                return "Okänd tjänst"
-    except Exception as e:
-        return f"Fel vid identifiering: {e}"
-# Exempel på användning
-if __name__ == "__main__":
-    target = "scanme.nmap.org"
-    port_to_test = 22  # Testa port 22 (SSH)
-    service = identify_service(target, port_to_test)
-    print(f"Tjänsten på port {port_to_test} är: {service}")
-"""
-
-
-
 #### Port-Scanner som även identifierar tjänster för öppna portar
 
 import socket
 import time
 import sys
-import threading
 
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
 CYAN = "\033[36m"
 YELLOW = "\033[33m"
-RED = "\033[31m"
+MAGENTA = "\033[35m"
 GREEN = "\033[32m"
+BLUE    = "\033[34m"
 
 width = 60
 
 def colored_banner():
-    print()  # blank line
-    print(BOLD + CYAN + "=" * width + RESET)
-    print(BOLD + YELLOW + "Kabelkramarnas Fancy Port Scanner".center(width) + RESET)
-    print(BOLD + CYAN + "=" * width + RESET)
-    print()  # blank line
+    print() 
+    print(BOLD + GREEN + "=" * width + RESET)
+    print(BOLD + BLUE + "  ##  Kabelkramarnas Fancy Port Scanner ## ".center(width) + RESET)
+    print(BOLD + GREEN + "=" * width + RESET)
+    print()  
 
 colored_banner()
 
 print(CYAN + "Here we could use an input for you to decide what target host to scan..." + RESET)
 print(CYAN + "But for obvious legal reasons our variable target_host is set to scanme.nmap.org" + RESET)
-print()  # blank line
+print()
 
-# Important warnings in bold red
-print(BOLD + RED + "!! REMEMBER: Only scan hosts you own or have permission to scan !!" + RESET)
-print(BOLD + RED + "!! NOTE: Type 'end', 'exit' or 'quit' to terminate the scan. !!" + RESET)
+# Important warnings in green
+print(GREEN + "!! REMEMBER: Only scan hosts you own or have permission to scan !!" + RESET)
+print(GREEN + "!! NOTE: Type 'end', 'exit' or 'quit' to terminate the scan. !!" + RESET)
 print()
 
 
@@ -179,7 +62,7 @@ def check_for_exit(s: str):
 
 # Loop until the user enters a valid integer for the start port
 while True:
-    raw = input("Define port scan range from port (Enter port number):-->   ").strip()
+    raw = input("Define port scan range from port (Enter port number)---> ").strip()
     check_for_exit(raw)  # exit if the user typed end/exit/quit
     try:
         start = int(raw)
@@ -200,21 +83,13 @@ while True:
     except ValueError:
         print("Error: You did not type a valid port number (not text). Example: 443. Please try again..."
               "\nNOTE: It needs to be bigger or equal to the start port you chose.")
-
-
-print(f"Vald portintervall: {start} - {ended}")
+        
 
 presentation = input("Type ALL to show result of every port or OPEN to only show open ports: ").lower().strip()
-blubb = input("Press Enter to start scanning...").lower().strip()
-
 
 
 def id_protocol(target: str, port: int, timeout: float = 2.0) -> (str, str):
-
-    """"
-    Denna funktion ska försöka läsa en banner från målets port och avgöra tjänsten.
-    Retur: (banner:text, guessed_service) - banner_text kan vara '' om data inte hittats.
-    """
+    
     scan_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     scan_sock.settimeout(timeout)
 
@@ -325,4 +200,8 @@ def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 
     
     print("Scan complete...\nThank you for using Kabelkramarnas fancy Port-Scanner!")
 
+if __name__ == "__main__":
+    target_host = "scanme.nmap.org"
+    scan_ports_with_service(target_host, start, ended, timeout = 1.0)
+    
 

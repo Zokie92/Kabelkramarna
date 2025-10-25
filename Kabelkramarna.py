@@ -1,0 +1,42 @@
+
+#!/usr/bin/env python3
+"""
+Network Scanner Project
+Students: [Mattias E, Kaj, Ludde JM, Mattias L, Niclas F]
+Start date: [2025-10-20]
+"""
+
+"""                              ### Description ###.  
+
+This script is part of the Kabelkramarna project, which aims to develop a network scanner tool.
+The tool will scan local networks to identify connected devices and their open ports.
+The project is a collaborative effort by a group of students to enhance their understanding of network protocols
+and socket programming in Python.
+also practice error handling (timeouts, connection refused, OSError), performance considerations, 
+and result documentation all while emphasizing ethical and legal responsibility in network scanning.
+"""
+
+########### STEG 1 ###########
+
+import socket
+import sys
+
+print("Scanning target: scanme.nmap.org...")
+port_scan = int(input("Select a port to scan: "))
+try:
+    socket.setdefaulttimeout(2)
+
+    test_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    try:
+        test_socket.connect(("scanme.nmap.org", port_scan))
+        print("Port is open.")
+    except Exception as e:
+        print(f"Port is closed or unreachable: {e}")
+    finally:
+        test_socket.close()
+except ValueError:
+    print("Invalid entry. Please select a numerical value.")
+
+########### STEG 2 ###########
+
