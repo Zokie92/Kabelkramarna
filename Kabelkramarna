@@ -37,4 +37,9 @@ try:
 except ValueError:
     print("Invalid entry. Please select a numerical value.")
 
+<<<<<<< HEAD
 ########### STEG 2 ###########
+
+=======
+########### STEG 2 ###########
+>>>>>>> b5f0438e011fd023c049c2a580107d36432e4f21
