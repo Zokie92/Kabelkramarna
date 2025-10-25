@@ -5,6 +5,11 @@ Network Scanner Project
 Students: [Mattias E, Kaj, Ludde JM, Mattias L, Niclas F]
 Start date: [2025-10-20]
 """
+import socket
+import time
+import sys
+
+
 RESET = "\033[0m"
 BOLD = "\033[1m"
 CYAN = "\033[36m"
@@ -15,26 +20,25 @@ BLUE    = "\033[34m"
 
 width = 60
 
-DESCRIPTION = """Kabelkramarna network scanner — simple, educational port/network scanner.
-
-Scans local networks to discover hosts and open ports using Python sockets.
-Designed for learning socket programming, error handling, and performance tradeoffs.
-Use only on networks and hosts you own or have explicit permission to scan.
-"""
-
 def colored_banner():
     print() 
-    print(BOLD + GREEN + "=" * width + RESET)
-    print(BOLD + BLUE + "  ##  Kabelkramarnas Fancy Port Scanner ## ".center(width) + RESET)
-    print(BOLD + GREEN + "=" * width + RESET)
+    print(BOLD + CYAN + "=" * width + RESET)
     print() 
+    print("  ##  Kabelkramarnas Fancy Port Scanner  ## ".center(width) + RESET)
+    print() 
+    print(BOLD + CYAN + "=" * width + RESET)
+    print()  
 
-def print_colored_description():
-    print()
-    print(BOLD + MAGENTA + "=== Kabelkramarna network scanner ===" + RESET)
-    print(CYAN + DESCRIPTION.strip() + RESET)
-    print(BOLD + YELLOW + "Note:" + RESET + " " + GREEN + "Only scan systems you own or have permission to scan." + RESET)
-    print()
+colored_banner()
+
+print(CYAN + "Here we could use an input for you to decide what target host to scan..." + RESET)
+print(CYAN + "But for obvious legal reasons our variable target_host is set to scanme.nmap.org" + RESET)
+print()
+
+# Important warnings in 
+print(GREEN + "!! REMEMBER: Only scan hosts you own or have permission to scan !!" + RESET)
+print(GREEN + "!! NOTE: Type 'end', 'exit' or 'quit' to terminate the scan. !!" + RESET)
+print()
 
 
 ########### STEG 1 ###########
