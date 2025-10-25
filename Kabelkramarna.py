@@ -5,6 +5,7 @@ Network Scanner Project
 Students: [Mattias E, Kaj, Ludde JM, Mattias L, Niclas F]
 Start date: [2025-10-20]
 """
+
 import socket
 import time
 import sys
@@ -31,14 +32,6 @@ def colored_banner():
 
 colored_banner()
 
-print(CYAN + "Here we could use an input for you to decide what target host to scan..." + RESET)
-print(CYAN + "But for obvious legal reasons our variable target_host is set to scanme.nmap.org" + RESET)
-print()
-
-# Important warnings in 
-print(GREEN + "!! REMEMBER: Only scan hosts you own or have permission to scan !!" + RESET)
-print(GREEN + "!! NOTE: Type 'end', 'exit' or 'quit' to terminate the scan. !!" + RESET)
-print()
 
 
 ########### STEG 1 ###########
