@@ -138,24 +138,71 @@ if __name__ == "__main__":
 
 import socket
 import time
-
-print(" ")
-print("##########################################################")
-print("###### Welcome to Kabelkramarnas fancy Port-Scanner ######")
-print("##########################################################")
-print(" ")
-print("Here we could use an input for you to decide what tagret host to scan....")
-print("But for obvious legal reasons our variable target_host is set to scanme.nmap.org")
-print(" ")
+import sys
+import threading
 
 
-try:
-    start = int(input("Define port scan range from port (enter port number): "))
-    ended = int(input("To port: "))
-except ValueError:
-    print("Error: please enter a valid number, letters wont work buddy!.")
-    # handle the error (exit or ask again)
-    raise SystemExit(1)
+RESET = "\033[0m"
+BOLD = "\033[1m"
+CYAN = "\033[36m"
+YELLOW = "\033[33m"
+RED = "\033[31m"
+GREEN = "\033[32m"
+
+width = 60
+
+def colored_banner():
+    print()  # blank line
+    print(BOLD + CYAN + "=" * width + RESET)
+    print(BOLD + YELLOW + "Kabelkramarnas Fancy Port Scanner".center(width) + RESET)
+    print(BOLD + CYAN + "=" * width + RESET)
+    print()  # blank line
+
+colored_banner()
+
+print(CYAN + "Here we could use an input for you to decide what target host to scan..." + RESET)
+print(CYAN + "But for obvious legal reasons our variable target_host is set to scanme.nmap.org" + RESET)
+print()  # blank line
+
+# Important warnings in bold red
+print(BOLD + RED + "!! REMEMBER: Only scan hosts you own or have permission to scan !!" + RESET)
+print(BOLD + RED + "!! NOTE: Type 'end', 'exit' or 'quit' to terminate the scan. !!" + RESET)
+print()
+
+
+def check_for_exit(s: str):
+    """Exits the program if the user typed an exit command."""
+    if s.lower() in ("end", "exit", "quit"):
+        print("Exiting the program — goodbye!")
+        sys.exit(0)
+    return False
+
+# Loop until the user enters a valid integer for the start port
+while True:
+    raw = input("Define port scan range from port (Enter port number):-->   ").strip()
+    check_for_exit(raw)  # exit if the user typed end/exit/quit
+    try:
+        start = int(raw)
+        break
+    except ValueError:
+        print("Error: Please enter a valid port number (not text). Example: 80. Please try again...")
+
+# Loop until the user enters a valid integer for the end port that is >= start
+while True:
+    raw = input("To port: ").strip()
+    check_for_exit(raw)  # exit if the user typed end/exit/quit
+    try:
+        ended = int(raw)
+        if ended < start:
+            print("Error: 'To port' needs to be bigger or equal to the start port. Please try again...")
+            continue
+        break
+    except ValueError:
+        print("Error: You did not type a valid port number (not text). Example: 443. Please try again..."
+              "\nNOTE: It needs to be bigger or equal to the start port you chose.")
+
+
+print(f"Vald portintervall: {start} - {ended}")
 
 presentation = input("Type ALL to show result of every port or OPEN to only show open ports: ").lower().strip()
 blubb = input("Press Enter to start scanning...").lower().strip()
@@ -276,6 +323,6 @@ def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 
             finally:
                 scan_sock.close()
     
-    print("Scan complete...\nThank you for doing some really shady stuff with us.")
+    print("Scan complete...\nThank you for using Kabelkramarnas fancy Port-Scanner!")
 
 
