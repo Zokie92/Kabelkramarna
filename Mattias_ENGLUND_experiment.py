@@ -139,8 +139,6 @@ if __name__ == "__main__":
 import socket
 import time
 import sys
-import threading
-
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
@@ -165,8 +163,8 @@ print(CYAN + "But for obvious legal reasons our variable target_host is set to s
 print()  # blank line
 
 # Important warnings in bold red
-print(BOLD + RED + "!! REMEMBER: Only scan hosts you own or have permission to scan !!" + RESET)
-print(BOLD + RED + "!! NOTE: Type 'end', 'exit' or 'quit' to terminate the scan. !!" + RESET)
+print(GREEN + "!! REMEMBER: Only scan hosts you own or have permission to scan !!" + RESET)
+print(GREEN + "!! NOTE: Type 'end', 'exit' or 'quit' to terminate the scan. !!" + RESET)
 print()
 
 
@@ -179,7 +177,7 @@ def check_for_exit(s: str):
 
 # Loop until the user enters a valid integer for the start port
 while True:
-    raw = input("Define port scan range from port (Enter port number):-->   ").strip()
+    raw = input("Define port scan range from port (Enter port number):>>>:").strip()
     check_for_exit(raw)  # exit if the user typed end/exit/quit
     try:
         start = int(raw)
@@ -206,8 +204,6 @@ print(f"Vald portintervall: {start} - {ended}")
 
 presentation = input("Type ALL to show result of every port or OPEN to only show open ports: ").lower().strip()
 blubb = input("Press Enter to start scanning...").lower().strip()
-
-
 
 def id_protocol(target: str, port: int, timeout: float = 2.0) -> (str, str):
 
