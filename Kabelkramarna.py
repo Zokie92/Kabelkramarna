@@ -32,8 +32,6 @@ def colored_banner():
 
 colored_banner()
 
-
-
 ########### STEG 1 ###########
 
 import socket
