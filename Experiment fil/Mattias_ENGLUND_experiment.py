@@ -204,27 +204,30 @@ if __name__ == "__main__":
 
 
 # Introduktion.
-print("Good day\nMy name is Mattias\nI'm here to calculate everything by two, try me!!! ") # Introducerar programmet och dess syfte.
-print("Type 'end' or 'exit' to stop the program.\n") #Ger användaren
+print("Hello !\nMy name is Mattias\nI'm here to calculate everything by two for you! ") 
+print("Type 'Quit' or 'Exit' to stop the program.\n") 
+# Ger användaren information om hur den avslutar programmet genom att skriva 'end' eller 'exit'.
 
 # En while-loop som körs tills vi använder 'break' som avslutar loopen (nämns även nedan)
-while True:
+while True: 
+    # Startar en loop som fortsätter tills den bryts med 'break'.
     # Tar in text (input) från användaren, alltså det användaren skriver in.
-    user = input("Enter a number:  ") # Ber användaren att skriva in ett tal med hjälp av (Input)
+    user = input("Enter a number:  ") # Ber användaren att skriva in ett tal med hjälp av input funktionen..
 
     # En if som kollar om användaren vill avsluta programmet med 'end' eller 'exit'. 
-    if user.lower() in ["end", "exit"]: # Kollar om användarens input är 'end' eller 'exit', oavsett om det är stora eller små bokstäver.
-        print("Goodbye And thank you for playing with me, see you later!") # Skrivs ut när användaren vill avsluta programmet.
+    if user.lower() in ["quit", "exit"]: 
+        # Kollar om användarens input är 'end' eller 'exit', oavsett om det är stora eller små bokstäver.
+        print("Goodbye And thank you for playing with me, see you later!")  # Skrivs ut när användaren vill avsluta programmet.
         break  # Avslutar loopen 
 
     # Try: används för att fånga upp fel.
-    try: # Försök att köra koden inuti detta block.
+    try: 
         # Omvandlar användarens input till ett flyttal (float) för att
         # omvandla tal med decimaler.
-        number = float(user)
+        number = float(user) # Konverterar användarens input till ett flyttal (decimal).
 
         # En for loop som körs 1 gång (Behövs denna loopen egentligen, fråga Johan?)
-        for i in range(1): # Loopen körs bara en gång.
+        for i in range(1): # Loopen körs bara en gång. 
             # Multiplicerar användarens tal med 2
             result = number * 2
             # Skriver ut resultatet med hjälp av en f-sträng
@@ -232,8 +235,8 @@ while True:
 
     # Om användaren skriver något som inte går att göra till ett tal.
     except ValueError: 
-        print("Enter a valid number, please!") #Skrivs ut om användaren inte skriver in ett giltigt tal.
+        print("Enter a valid number, please! (like 5 or 3.14)") #Skrivs ut om användaren inte skriver in ett giltigt tal.
 
     # Else körs bara om allt i try-blocket lyckades.
-    else:
+    else: 
         print("That worked just fine!") #Skrivs ut om allt gick bra.
