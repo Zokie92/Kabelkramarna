@@ -18,7 +18,7 @@
 #-**Tips:** Vissa tjänster behöver att du skickar data först innan de svarar!
 
 #### Port-Scanner som även identifierar tjänster för öppna portar
-
+"""
 import socket
 import time
 import sys
@@ -48,7 +48,7 @@ print(CYAN + "But for obvious legal reasons our variable target_host is set to s
 print()
 
 def check_for_exit(s: str):
-    """Exits the program if the user typed an exit command."""
+   #Exits the program if the user typed an exit command.
     if s.lower() in ("end", "exit", "quit"):
         print("Exiting the program — goodbye and thank your using our scanner tool!")
         sys.exit(0)
@@ -197,5 +197,43 @@ def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 
 if __name__ == "__main__":
     target_host = "scanme.nmap.org"
     scan_ports_with_service(target_host, start, ended, timeout = 1.0)
+"""
 
 
+
+
+
+# Introduktion.
+print("Good day\nMy name is Mattias\nI'm here to calculate everything by two, try me!!! ") # Introducerar programmet och dess syfte.
+print("Type 'end' or 'exit' to stop the program.\n") #Ger användaren
+
+# En while-loop som körs tills vi använder 'break' som avslutar loopen (nämns även nedan)
+while True:
+    # Tar in text (input) från användaren, alltså det användaren skriver in.
+    user = input("Enter a number:  ") # Ber användaren att skriva in ett tal med hjälp av (Input)
+
+    # En if som kollar om användaren vill avsluta programmet med 'end' eller 'exit'. 
+    if user.lower() in ["end", "exit"]: # Kollar om användarens input är 'end' eller 'exit', oavsett om det är stora eller små bokstäver.
+        print("Goodbye And thank you for playing with me, see you later!") # Skrivs ut när användaren vill avsluta programmet.
+        break  # Avslutar loopen 
+
+    # Try: används för att fånga upp fel.
+    try: # Försök att köra koden inuti detta block.
+        # Omvandlar användarens input till ett flyttal (float) för att
+        # omvandla tal med decimaler.
+        number = float(user)
+
+        # En for loop som körs 1 gång (Behövs denna loopen egentligen, fråga Johan?)
+        for i in range(1): # Loopen körs bara en gång.
+            # Multiplicerar användarens tal med 2
+            result = number * 2
+            # Skriver ut resultatet med hjälp av en f-sträng
+            print(f"Your number {number} multiplied by 2 is {result:.2f}\n") #skriver ut resultatet med 2 decimaler.
+
+    # Om användaren skriver något som inte går att göra till ett tal.
+    except ValueError: 
+        print("Enter a valid number, please!") #Skrivs ut om användaren inte skriver in ett giltigt tal.
+
+    # Else körs bara om allt i try-blocket lyckades.
+    else:
+        print("That worked just fine!") #Skrivs ut om allt gick bra.
