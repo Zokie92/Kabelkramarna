@@ -199,10 +199,7 @@ if __name__ == "__main__":
 """
 
 
-
-
-
-#### Port-Scanner som även identifierar tjänster för öppna portar
+########### V4 ##############
 
 import socket
 import time
