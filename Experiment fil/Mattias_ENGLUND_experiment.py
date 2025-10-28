@@ -203,40 +203,25 @@ if __name__ == "__main__":
 
 
 
-# Introduktion.
-print("Hello !\nMy name is Mattias\nI'm here to calculate everything by two for you! ") 
-print("Type 'Quit' or 'Exit' to stop the program.\n") 
-# Ger användaren information om hur den avslutar programmet genom att skriva 'end' eller 'exit'.
+# Introduktion
+print("Hello!\nMy name is Mattias\nI'm here to calculate everything by two for you!")
+print("Type 'Quit' or 'Exit' to stop the program.\n")
 
-# En while-loop som körs tills vi använder 'break' som avslutar loopen (nämns även nedan)
-while True: 
-    # Startar en loop som fortsätter tills den bryts med 'break'.
-    # Tar in text (input) från användaren, alltså det användaren skriver in.
-    user = input("Enter a number:  ") # Ber användaren att skriva in ett tal med hjälp av input funktionen..
+while True:
+    user = input("Enter a number:  ")
 
-    # En if som kollar om användaren vill avsluta programmet med 'end' eller 'exit'. 
-    if user.lower() in ["quit", "exit"]: 
-        # Kollar om användarens input är 'end' eller 'exit', oavsett om det är stora eller små bokstäver.
-        print("Goodbye And thank you for playing with me, see you later!")  # Skrivs ut när användaren vill avsluta programmet.
-        break  # Avslutar loopen 
+    if user.lower() in ["quit", "exit"]:
+        print("Goodbye and thank you for playing with me, see you later!")
+        break
 
-    # Try: används för att fånga upp fel.
-    try: 
-        # Omvandlar användarens input till ett flyttal (float) för att
-        # omvandla tal med decimaler.
-        number = float(user) # Konverterar användarens input till ett flyttal (decimal).
-
-        # En for loop som körs 1 gång (Behövs denna loopen egentligen, fråga Johan?)
-        for i in range(1): # Loopen körs bara en gång. 
-            # Multiplicerar användarens tal med 2
+    try:
+        number = float(user)
+        for i in range(1):
             result = number * 2
-            # Skriver ut resultatet med hjälp av en f-sträng
-            print(f"Your number {number} multiplied by 2 is {result:.2f}\n") #skriver ut resultatet med 2 decimaler.
+            print(f"Your number {number} multiplied by 2 is {result:.2f}\n")
 
-    # Om användaren skriver något som inte går att göra till ett tal.
-    except ValueError: 
-        print("Enter a valid number, please! (like 5 or 3.14)") #Skrivs ut om användaren inte skriver in ett giltigt tal.
+    except ValueError:
+        print("Enter a valid number, please! (like 5 or 3.14)")
 
-    # Else körs bara om allt i try-blocket lyckades.
-    else: 
-        print("That worked just fine!") #Skrivs ut om allt gick bra.
+    else:
+        print("That worked just fine!")
