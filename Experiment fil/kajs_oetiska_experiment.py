@@ -206,6 +206,7 @@ import time
 from datetime import datetime
 
 def id_protocol(target: str, port: int, timeout: float = 2.0) -> (str, str):
+    
     """"
     Denna funktion ska försöka läsa en banner från målets port och avgöra tjänsten.
     Retur: (banner:text, guessed_service) - banner_text kan vara '' om data inte hittats.
