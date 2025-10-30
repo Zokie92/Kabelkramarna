@@ -188,7 +188,7 @@ if __name__ == "__main__":
                 timeout_val = 1.0
 
             # Kör skanningen och samla resultatrader
-            result_lines = scan_ports_with_service(target_host, start, end, timeout=timeout_val, presentation=presentation)
+            result_lines = scan_ports(target_host, start, end, timeout=timeout_val, presentation=presentation)
 
             # Alternativ för att logga resultatet i en text-fil
             save_choice = input("Would you like to save the results to a file? (y/n): ").lower().strip()
