@@ -1,11 +1,4 @@
-"""    try:  
-        result = sock.connect_ex((target, port))
-        return result == 0
-    finally: 
-        try: 
-            sock.close()
-        except Exception: 
-            pass    """
+###### PORT SCANNER DELUXE MED EXTRA MYCKET STARK SÅS ######
 
 import socket
 import sys
@@ -120,14 +113,14 @@ def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presenta
             results.append(line)
         finally:
             sock.close()
-    footer = f"\n [Scan complete. End time: {datetime.now()}]"
+    footer = f"\n [Scan complete. End time: {datetime.now().replace(microsecond=0)}]"
     print(footer)
     results.append(footer)
     return results
 
 def save_results_to_file(lines, filename=None):
     if not filename:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now().replace(microsecond=0)
         filename = f"portscan_{timestamp}.txt"
 
     try:
