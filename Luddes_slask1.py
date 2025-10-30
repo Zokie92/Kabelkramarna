@@ -156,8 +156,10 @@ def scan_ports(host, ports, timeout=1.0, workers=100, identify=False):
     workers = max(1, min(workers, len(ports)))
     pbar = None
     if _HAS_TQDM:
-        pbar = tqdm(total=len(ports), desc=f"Skannar {host}", unit="port")
+        pbar = tqdm(total=len(ports), desc=f"Skannar {host}", unit="port", 
+                   ncols=60, bar_format='{desc}: {percentage:3.0f}%|{bar}|')
 
+    # First phase: Scan all ports and collect results
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
         futures = {ex.submit(check_port, host, p, timeout): p for p in ports}
         for fut in as_completed(futures):
@@ -171,22 +173,58 @@ def scan_ports(host, ports, timeout=1.0, workers=100, identify=False):
             if is_open and identify:
                 banner, guess = id_protocol(host, p, timeout=timeout)
             results[p] = (is_open, banner, guess)
-            if is_open:
-                if _HAS_COLOR:
-                    print(f"Port {p} på {host} är {Fore.GREEN}ÖPPEN{Style.RESET_ALL}.")
-                else:
-                    print(f"Port {p} på {host} är ÖPPEN.")
-                if identify and guess:
-                    print(f"  Tjänst: {guess} - {banner}")
-            else:
-                if _HAS_COLOR:
-                    print(f"Port {p} på {host} är {Fore.RED}STÄNGD{Style.RESET_ALL} eller otillgänglig.")
-                else:
-                    print(f"Port {p} på {host} är STÄNGD eller otillgänglig.")
             if pbar:
                 pbar.update(1)
     if pbar:
         pbar.close()
+
+    # Second phase: Print results in a clean list format
+    print(f"\nResultat för {host}:")
+    print("-" * 60)
+    
+    # First show open ports
+    open_ports = [(p, results[p][1], results[p][2]) for p in sorted(results) if results[p][0]]
+    if open_ports:
+        if _HAS_COLOR:
+            print(f"{Fore.GREEN}Öppna portar:{Style.RESET_ALL}")
+        else:
+            print("Öppna portar:")
+        for p, banner, guess in open_ports:
+            if _HAS_COLOR:
+                port_line = f"  {Fore.GREEN}Port {p:<6}{Style.RESET_ALL}"
+            else:
+                port_line = f"  Port {p:<6}"
+            if identify and guess:
+                port_line += f" - {guess}"
+                if banner:
+                    port_line += f" ({banner})"
+            print(port_line)
+    else:
+        if _HAS_COLOR:
+            print(f"{Fore.YELLOW}Inga öppna portar hittades{Style.RESET_ALL}")
+        else:
+            print("Inga öppna portar hittades")
+    
+    # Then show closed ports if there aren't too many
+    closed_ports = [p for p in sorted(results) if not results[p][0]]
+    if closed_ports:
+        if len(closed_ports) <= 10:  # Only show closed ports if there aren't too many
+            if _HAS_COLOR:
+                print(f"\n{Fore.RED}Stängda portar:{Style.RESET_ALL}")
+            else:
+                print("\nStängda portar:")
+            for p in closed_ports:
+                if _HAS_COLOR:
+                    print(f"  {Fore.RED}Port {p}{Style.RESET_ALL}")
+                else:
+                    print(f"  Port {p}")
+        else:
+            if _HAS_COLOR:
+                print(f"\n{Fore.RED}Stängda portar:{Style.RESET_ALL} {len(closed_ports)} portar")
+            else:
+                print(f"\nStängda portar: {len(closed_ports)} portar")
+    
+    print("-" * 60)
     return results
 
 
