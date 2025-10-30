@@ -316,14 +316,14 @@ def scan_ports_with_service(target: str, start: int, end: int, timeout: float = 
         finally:
             scan_sock.close()
 
-    footer = f"\nScan complete. End time: {datetime.now().isoformat()}\n"
+    footer = f"\nScan complete. End time: {datetime.now().replace(milisecond=0)}\n"
     print(footer)
     results.append(footer)
     return results
 
 def save_results_to_file(lines, filename=None):
     if not filename:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now().replace(milisecond=0)
         filename = f"portscan_{timestamp}.txt"
 
     try:
