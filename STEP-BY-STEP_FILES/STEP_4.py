@@ -95,7 +95,7 @@ def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presenta
     total_ports = end - start + 1 
     scanned_ports = []
         
-    print(f"Scanning {target} from port {start} to {end}.\nTimeout set to: {timeout} ")
+    print(f"\nScanning {target} from port {start} to {end}.\nTimeout set to: {timeout} ")
     
     for idx, port in enumerate(range(start, end + 1), 1):
         scanned_ports.append(port)
@@ -106,13 +106,13 @@ def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presenta
             if res == 0:
                 banner, service = id_service(target, port, timeout=1.0)
                 if banner:
-                    line = f"{Fore.GREEN}port {port}: [OPEN] - {service} - Banner: {banner.splitlines()[0]}{Style.RESET_ALL}"
+                    line = f"{Fore.GREEN}Port {port}: [OPEN] - {service} - Banner: {banner.splitlines()[0]}{Style.RESET_ALL}"
                 else:
-                    line = f"{Fore.GREEN}port {port}: [OPEN] - {service} - No banner retrieved{Style.RESET_ALL}"
+                    line = f"{Fore.GREEN}Port {port}: [OPEN] - {service} - No banner retrieved{Style.RESET_ALL}"
             
                 results.append(line)
             else:
-                line = f"{Fore.RED}port {port}: [CLOSED]{Style.RESET_ALL}"
+                line = f"{Fore.RED}Port {port}: [CLOSED]{Style.RESET_ALL}"
                 if presentation == "all":
                     
                     results.append(line)
@@ -125,7 +125,7 @@ def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presenta
     
         progress = int((idx / total_ports) * 30)  # 30 chars wide
         bar = f"[{'█' * progress}{'░' * (30 - progress)}] {int((idx / total_ports) * 100)}%"
-        sys.stdout.write(f"\rSkannar... {bar}")
+        sys.stdout.write(f"\n\rScanning... {bar}")
         sys.stdout.flush()
 
     footer = f"\n [Scan complete. End time: {datetime.now().replace(microsecond=0)}]"
@@ -141,7 +141,7 @@ def save_results_to_file(lines, filename=None):
     try:
         with open(filename, "w", encoding="utf-8") as f:
             for line in lines:
-                f.write(line + "\n")
+                f.write(strip_ansi(line) + "\n")
         print(f"Results saved to: {filename}")
     except Exception as e:
         print(f"Could not save file: {e}")
@@ -162,6 +162,13 @@ def get_int_input(prompt, default=None, minval=0, maxval=65535):
             return iv
         except ValueError:
             print("Please enter a valid number.")
+
+###### FUNKTION SOM RENSAR FÄRGER
+ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+
+def strip_ansi(line: str) -> str:
+    return ansi_escape.sub('', line)
+
 
 
 if __name__ == "__main__":
@@ -184,11 +191,6 @@ if __name__ == "__main__":
                 print("End port must be a higher number than start port. Please try again.")
                 continue
 
-            presentation = input("Type ALL to show result of every port or OPEN to only show open ports: ").lower().strip()
-            if presentation not in ("all", "open"):
-                print("Invalid presentation choice, defaulting to ALL.")
-                presentation = "all"
-
             timeout = input("Set a timeout for each port in seconds. Use '.' for a decimal (press Enter for default 1s): ").strip()
             try:
                 timeout_val = float(timeout) if timeout else 1.0
@@ -196,9 +198,12 @@ if __name__ == "__main__":
                 timeout_val = 1.0
 
             # Kör skanningen och samla resultatrader
-            result_lines, scanned_ports = scan_ports(target_host, start, end, timeout=timeout_val, presentation=presentation)
+            result_lines, scanned_ports = scan_ports(target_host, start, end, timeout=timeout_val)
 
             print(f"\nScanned ports: {start} to {end} on host {target_host}\n")
+
+            clean_lines = [strip_ansi(s) for s in result_lines]
+            print("\n".join(clean_lines))
 
             # Alternativ för att logga resultatet i en text-fil
             save_choice = input("Would you like to save the results to a file? (y/n): ").lower().strip()
