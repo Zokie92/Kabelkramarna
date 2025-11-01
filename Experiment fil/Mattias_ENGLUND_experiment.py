@@ -245,7 +245,7 @@ def save_results_to_file(lines, filename=None):
         print(C_ERR + f"Could not save file: {e}" + C_RESET)
 
 
-def get_int_input(prompt, default=None, minval=0, maxval=65535):
+def get_int_input(prompt, default=None, minval=0, maxval=1025) -> int:
     while True:
         val = input(prompt).strip()
         if val == "" and default is not None:
