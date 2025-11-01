@@ -91,13 +91,13 @@ def id_service(target: str, port: int, timeout: float = 1.0) -> Tuple[str, str]:
 # Nästa funktion ska returnera resultatet. 
 
 def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presentation: str = "all"): 
-    results = [] 
+    results = []
+    total_ports = end - start + 1 
     scanned_ports = []
         
-
     print(f"Scanning {target} from port {start} to {end}.\nTimeout set to: {timeout} ")
     
-    for port in range(start, end + 1):
+    for idx, port in enumerate(range(start, end + 1), 1):
         scanned_ports.append(port)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
@@ -121,7 +121,13 @@ def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presenta
             
             results.append(line)
         finally:
-            sock.close()
+          sock.close()
+    
+        progress = int((idx / total_ports) * 30)  # 30 chars wide
+        bar = f"[{'█' * progress}{'░' * (30 - progress)}] {int((idx / total_ports) * 100)}%"
+        sys.stdout.write(f"\rSkannar... {bar}")
+        sys.stdout.flush()
+
     footer = f"\n [Scan complete. End time: {datetime.now().replace(microsecond=0)}]"
     print(footer)
     results.append(footer)
