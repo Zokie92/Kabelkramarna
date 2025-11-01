@@ -91,14 +91,14 @@ def id_service(target: str, port: int, timeout: float = 1.0) -> Tuple[str, str]:
 # Nästa funktion ska returnera resultatet. 
 
 def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presentation: str = "all"): 
-    results = []
+    scan_results = {}  # Dictionary to store scan results
     total_ports = end - start + 1 
-    scanned_ports = []
+    scanned_ports = list(range(start, end + 1))
+    start_time = datetime.now()
         
     print(f"Scanning {target} from port {start} to {end}.\nTimeout set to: {timeout} ")
     
     for idx, port in enumerate(range(start, end + 1), 1):
-        scanned_ports.append(port)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
         try: 
@@ -117,20 +117,80 @@ def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presenta
                     
                     results.append(line)
         except Exception as e:
-            line = f"Port {port}: [ERROR] - {e}"
-            
-            results.append(line)
+            scan_results[port] = {"status": "error", "error": str(e)}
         finally:
-          sock.close()
+            sock.close()
     
+        # Update progress bar
         progress = int((idx / total_ports) * 30)  # 30 chars wide
         bar = f"[{'█' * progress}{'░' * (30 - progress)}] {int((idx / total_ports) * 100)}%"
-        sys.stdout.write(f"\rSkannar... {bar}")
+        sys.stdout.write(f"\n\rScanning... {bar}")
         sys.stdout.flush()
 
-    footer = f"\n [Scan complete. End time: {datetime.now().replace(microsecond=0)}]"
-    print(footer)
-    results.append(footer)
+    # Calculate scan duration
+    duration = datetime.now() - start_time
+    
+    # Prepare results for display and storage
+    results = []
+    
+    # Print summary header
+    print("\n")  # Clear progress bar line
+    print("-" * 60)
+    print(f"Scan Results for {target}")
+    print(f"Time: {datetime.now().replace(microsecond=0)}")
+    print(f"Duration: {duration.total_seconds():.1f} seconds")
+    print("-" * 60)
+    results.extend(["-" * 60, f"Scan Results for {target}", 
+                   f"Time: {datetime.now().replace(microsecond=0)}", 
+                   f"Duration: {duration.total_seconds():.1f} seconds", 
+                   "-" * 60])
+
+    # First show open ports
+    open_ports = [p for p in scanned_ports if scan_results[p]["status"] == "open"]
+    if open_ports:
+        print(f"\n{Fore.GREEN}Open Ports:{Style.RESET_ALL}")
+        results.append("\nOpen Ports:")
+        for port in open_ports:
+            r = scan_results[port]
+            if r["banner"]:
+                line = f"{Fore.GREEN}Port {port:5d}: {r['service']} - Banner: {r['banner'].splitlines()[0]}{Style.RESET_ALL}"
+                results.append(f"Port {port:5d}: {r['service']} - Banner: {r['banner'].splitlines()[0]}")
+            else:
+                line = f"{Fore.GREEN}Port {port:5d}: {r['service']}{Style.RESET_ALL}"
+                results.append(f"Port {port:5d}: {r['service']}")
+            print(line)
+    else:
+        print(f"{Fore.YELLOW}No open ports found{Style.RESET_ALL}")
+        results.append("No open ports found")
+
+    # Then show closed ports if requested
+    if presentation == "all":
+        closed_ports = [p for p in scanned_ports if scan_results[p]["status"] == "closed"]
+        if closed_ports:
+            print(f"\n{Fore.RED}Closed Ports:{Style.RESET_ALL}")
+            results.append("\nClosed Ports:")
+            # If there are many closed ports, just show the count
+            if len(closed_ports) > 10:
+                print(f"{Fore.RED}{len(closed_ports)} ports closed{Style.RESET_ALL}")
+                results.append(f"{len(closed_ports)} ports closed")
+            else:
+                for port in closed_ports:
+                    print(f"{Fore.RED}Port {port:5d}{Style.RESET_ALL}")
+                    results.append(f"Port {port:5d}")
+
+    # Show any errors
+    error_ports = [p for p in scanned_ports if scan_results[p]["status"] == "error"]
+    if error_ports:
+        print(f"\n{Fore.YELLOW}Errors:{Style.RESET_ALL}")
+        results.append("\nErrors:")
+        for port in error_ports:
+            line = f"Port {port:5d}: {scan_results[port]['error']}"
+            print(line)
+            results.append(line)
+
+    print("-" * 60)
+    results.append("-" * 60)
+    
     return results, scanned_ports
 
 def save_results_to_file(lines, filename=None):
@@ -141,7 +201,7 @@ def save_results_to_file(lines, filename=None):
     try:
         with open(filename, "w", encoding="utf-8") as f:
             for line in lines:
-                f.write(line + "\n")
+                f.write(strip_ansi(line) + "\n")
         print(f"Results saved to: {filename}")
     except Exception as e:
         print(f"Could not save file: {e}")
@@ -162,6 +222,13 @@ def get_int_input(prompt, default=None, minval=0, maxval=65535):
             return iv
         except ValueError:
             print("Please enter a valid number.")
+
+###### FUNKTION SOM RENSAR FÄRGER
+ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+
+def strip_ansi(line: str) -> str:
+    return ansi_escape.sub('', line)
+
 
 
 if __name__ == "__main__":
@@ -184,11 +251,6 @@ if __name__ == "__main__":
                 print("End port must be a higher number than start port. Please try again.")
                 continue
 
-            presentation = input("Type ALL to show result of every port or OPEN to only show open ports: ").lower().strip()
-            if presentation not in ("all", "open"):
-                print("Invalid presentation choice, defaulting to ALL.")
-                presentation = "all"
-
             timeout = input("Set a timeout for each port in seconds. Use '.' for a decimal (press Enter for default 1s): ").strip()
             try:
                 timeout_val = float(timeout) if timeout else 1.0
@@ -196,9 +258,12 @@ if __name__ == "__main__":
                 timeout_val = 1.0
 
             # Kör skanningen och samla resultatrader
-            result_lines, scanned_ports = scan_ports(target_host, start, end, timeout=timeout_val, presentation=presentation)
+            result_lines, scanned_ports = scan_ports(target_host, start, end, timeout=timeout_val)
 
             print(f"\nScanned ports: {start} to {end} on host {target_host}\n")
+
+            clean_lines = [strip_ansi(s) for s in result_lines]
+            print("\n".join(clean_lines))
 
             # Alternativ för att logga resultatet i en text-fil
             save_choice = input("Would you like to save the results to a file? (y/n): ").lower().strip()
