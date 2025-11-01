@@ -1,6 +1,7 @@
 # portscanner_colored_full.py
 """
 Improved, colorized port scanner with a compact single-line progress display.
+Closed ports are printed compressed as ranges (e.g. 1-3,5,7-9).
 Requires: colorama
 Install: python3 -m pip install colorama
 
@@ -34,6 +35,30 @@ def shorten_banner(banner: str, width: int = 60) -> str:
         return ""
     single = banner.splitlines()[0]
     return textwrap.shorten(single, width=width, placeholder="...")
+
+# New helper: compress a sorted list of ints into ranges (e.g. [1,2,3,5,7,8] -> "1-3,5,7-8")
+def compress_ports_to_ranges(ports: List[int]) -> str:
+    if not ports:
+        return ""
+    ports = sorted(set(ports))
+    ranges = []
+    start = prev = ports[0]
+    for p in ports[1:]:
+        if p == prev + 1:
+            prev = p
+            continue
+        else:
+            if start == prev:
+                ranges.append(f"{start}")
+            else:
+                ranges.append(f"{start}-{prev}")
+            start = prev = p
+    # finalize last range
+    if start == prev:
+        ranges.append(f"{start}")
+    else:
+        ranges.append(f"{start}-{prev}")
+    return ",".join(ranges)
 
 
 def id_service(target: str, port: int, timeout: float = 1.0) -> Tuple[str, str]:
@@ -135,9 +160,9 @@ def format_header(target: str, start: int, end: int, timeout: float) -> None:
 
 
 def print_single_line_progress(current: int, total: int, elapsed: float, open_count: int, last_open: str, bar_length: int = 30) -> None:
-    percent = (current / total) * 100
-    filled_len = int(round(bar_length * current / float(total)))
-    bar = "█" * filled_len + "░" * (bar_length - filled_len)
+    percent = (current / total) * 100 if total else 100.0
+    filled_len = int(round(bar_length * current / float(total))) if total else bar_length
+    bar = "█" * filled_len + " " * (bar_length - filled_len)
     elapsed_str = time.strftime('%H:%M:%S', time.gmtime(int(elapsed)))
     # Compose a compact single-line status. It will overwrite itself via \r.
     extra = f" | Open: {open_count}"
@@ -209,16 +234,16 @@ def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presenta
     else:
         print(C_WARN + "No open ports found." + C_RESET)
 
-    if presentation == "all":
-        if closed_results:
-            print(C_FAIL + "\nClosed ports (sample):" + C_RESET)
-            sample = closed_results[:200]
-            print(C_FAIL + ", ".join(str(p) for p in sample) + ("..." if len(closed_results) > len(sample) else "") + C_RESET)
+    # NEW: compressed closed ports output
+    if closed_results:
+        compressed = compress_ports_to_ranges(closed_results)
+        print(C_FAIL + f"\nClosed ports: {len(closed_results)} total. Showing compressed ranges:" + C_RESET)
+        print(C_FAIL + f"{compressed}" + C_RESET)
 
-        if error_results:
-            print(C_ERR + "\nErrors during scan:" + C_RESET)
-            for port, err in error_results:
-                print(C_ERR + f"{port}: {err}" + C_RESET)
+    if error_results:
+        print(C_ERR + "\nErrors during scan:" + C_RESET)
+        for port, err in error_results:
+            print(C_ERR + f"{port}: {err}" + C_RESET)
 
     print(C_HEAD + "=" * 66 + C_RESET)
     print(f"Elapsed time: {time.strftime('%H:%M:%S', time.gmtime(int(elapsed)))}")
