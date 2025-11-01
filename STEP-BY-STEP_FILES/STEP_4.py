@@ -91,46 +91,98 @@ def id_service(target: str, port: int, timeout: float = 1.0) -> Tuple[str, str]:
 # Nästa funktion ska returnera resultatet. 
 
 def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presentation: str = "all"): 
-    results = []
+    scan_results = {}  # Dictionary to store scan results
     total_ports = end - start + 1 
-    scanned_ports = []
+    scanned_ports = list(range(start, end + 1))
+    start_time = datetime.now()
         
-    print(f"Scanning {target} from port {start} to {end}.\nTimeout set to: {timeout} ")
+    print(f"Scanning {target} from port {start} to {end}.\nTimeout set to: {timeout} seconds")
     
     for idx, port in enumerate(range(start, end + 1), 1):
-        scanned_ports.append(port)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
         try: 
             res = sock.connect_ex((target, port))
             if res == 0:
                 banner, service = id_service(target, port, timeout=1.0)
-                if banner:
-                    line = f"{Fore.GREEN}port {port}: [OPEN] - {service} - Banner: {banner.splitlines()[0]}{Style.RESET_ALL}"
-                else:
-                    line = f"{Fore.GREEN}port {port}: [OPEN] - {service} - No banner retrieved{Style.RESET_ALL}"
-            
-                results.append(line)
+                scan_results[port] = {"status": "open", "service": service, "banner": banner}
             else:
-                line = f"{Fore.RED}port {port}: [CLOSED]{Style.RESET_ALL}"
-                if presentation == "all":
-                    
-                    results.append(line)
+                scan_results[port] = {"status": "closed"}
         except Exception as e:
-            line = f"Port {port}: [ERROR] - {e}"
-            
-            results.append(line)
+            scan_results[port] = {"status": "error", "error": str(e)}
         finally:
-          sock.close()
+            sock.close()
     
+        # Update progress bar
         progress = int((idx / total_ports) * 30)  # 30 chars wide
         bar = f"[{'█' * progress}{'░' * (30 - progress)}] {int((idx / total_ports) * 100)}%"
         sys.stdout.write(f"\rSkannar... {bar}")
         sys.stdout.flush()
 
-    footer = f"\n [Scan complete. End time: {datetime.now().replace(microsecond=0)}]"
-    print(footer)
-    results.append(footer)
+    # Calculate scan duration
+    duration = datetime.now() - start_time
+    
+    # Prepare results for display and storage
+    results = []
+    
+    # Print summary header
+    print("\n")  # Clear progress bar line
+    print("-" * 60)
+    print(f"Scan Results for {target}")
+    print(f"Time: {datetime.now().replace(microsecond=0)}")
+    print(f"Duration: {duration.total_seconds():.1f} seconds")
+    print("-" * 60)
+    results.extend(["-" * 60, f"Scan Results for {target}", 
+                   f"Time: {datetime.now().replace(microsecond=0)}", 
+                   f"Duration: {duration.total_seconds():.1f} seconds", 
+                   "-" * 60])
+
+    # First show open ports
+    open_ports = [p for p in scanned_ports if scan_results[p]["status"] == "open"]
+    if open_ports:
+        print(f"\n{Fore.GREEN}Open Ports:{Style.RESET_ALL}")
+        results.append("\nOpen Ports:")
+        for port in open_ports:
+            r = scan_results[port]
+            if r["banner"]:
+                line = f"{Fore.GREEN}Port {port:5d}: {r['service']} - Banner: {r['banner'].splitlines()[0]}{Style.RESET_ALL}"
+                results.append(f"Port {port:5d}: {r['service']} - Banner: {r['banner'].splitlines()[0]}")
+            else:
+                line = f"{Fore.GREEN}Port {port:5d}: {r['service']}{Style.RESET_ALL}"
+                results.append(f"Port {port:5d}: {r['service']}")
+            print(line)
+    else:
+        print(f"{Fore.YELLOW}No open ports found{Style.RESET_ALL}")
+        results.append("No open ports found")
+
+    # Then show closed ports if requested
+    if presentation == "all":
+        closed_ports = [p for p in scanned_ports if scan_results[p]["status"] == "closed"]
+        if closed_ports:
+            print(f"\n{Fore.RED}Closed Ports:{Style.RESET_ALL}")
+            results.append("\nClosed Ports:")
+            # If there are many closed ports, just show the count
+            if len(closed_ports) > 10:
+                print(f"{Fore.RED}{len(closed_ports)} ports closed{Style.RESET_ALL}")
+                results.append(f"{len(closed_ports)} ports closed")
+            else:
+                for port in closed_ports:
+                    print(f"{Fore.RED}Port {port:5d}{Style.RESET_ALL}")
+                    results.append(f"Port {port:5d}")
+
+    # Show any errors
+    error_ports = [p for p in scanned_ports if scan_results[p]["status"] == "error"]
+    if error_ports:
+        print(f"\n{Fore.YELLOW}Errors:{Style.RESET_ALL}")
+        results.append("\nErrors:")
+        for port in error_ports:
+            line = f"Port {port:5d}: {scan_results[port]['error']}"
+            print(line)
+            results.append(line)
+
+    print("-" * 60)
+    results.append("-" * 60)
+    
     return results, scanned_ports
 
 def save_results_to_file(lines, filename=None):
