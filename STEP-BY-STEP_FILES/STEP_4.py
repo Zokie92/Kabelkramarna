@@ -1,10 +1,16 @@
 ###### PORT SCANNER DELUXE MED EXTRA MYCKET STARK SÅS ######
-
+import colorama
 import socket
 import sys
+import json
+import csv
+from colorama import Fore, Style
+import re
 from typing import Tuple
 import time
 from datetime import datetime
+
+
 
 print("Use this tool only on systems you own or are authorized to test.\nUnauthorized scanning is prohibited and may be illegal.\nFor safe test targets, use hosts like scanme.nmap.org.")
 
@@ -86,10 +92,13 @@ def id_service(target: str, port: int, timeout: float = 1.0) -> Tuple[str, str]:
 
 def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presentation: str = "all"): 
     results = [] 
+    scanned_ports = []
+        
 
     print(f"Scanning {target} from port {start} to {end}.\nTimeout set to: {timeout} ")
     
     for port in range(start, end + 1):
+        scanned_ports.append(port)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
         try: 
@@ -97,26 +106,26 @@ def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presenta
             if res == 0:
                 banner, service = id_service(target, port, timeout=1.0)
                 if banner:
-                    line = f"port {port}: [OPEN] - {service} - Banner: {banner.splitlines() [0]}"
+                    line = f"{Fore.GREEN}port {port}: [OPEN] - {service} - Banner: {banner.splitlines()[0]}{Style.RESET_ALL}"
                 else:
-                    line = f"port {port}: [OPEN] - {service} - No Banner received"
-                print(line)
+                    line = f"{Fore.GREEN}port {port}: [OPEN] - {service} - No banner retrieved{Style.RESET_ALL}"
+            
                 results.append(line)
             else:
-                line = f"Port {port}: [CLOSED]"
+                line = f"{Fore.RED}port {port}: [CLOSED]{Style.RESET_ALL}"
                 if presentation == "all":
-                    print(line)
+                    
                     results.append(line)
         except Exception as e:
             line = f"Port {port}: [ERROR] - {e}"
-            print(line)
+            
             results.append(line)
         finally:
             sock.close()
     footer = f"\n [Scan complete. End time: {datetime.now().replace(microsecond=0)}]"
     print(footer)
     results.append(footer)
-    return results
+    return results, scanned_ports
 
 def save_results_to_file(lines, filename=None):
     if not filename:
@@ -151,9 +160,9 @@ def get_int_input(prompt, default=None, minval=0, maxval=65535):
 
 if __name__ == "__main__":
     print(" ")
-    print("##########################################################")
-    print("###### Welcome to Kabelkramarnas fancy Port-Scanner ######")
-    print("##########################################################")
+    print("##############################################")
+    print(f"{Fore.YELLOW}{Style.BRIGHT}PORT SCANNER DELUXE MED EXTRA MYCKET STARK SÅS{Style.RESET_ALL}")
+    print("##############################################")
     print(" ")
     print("We do not take responsibility for this scanner being used for anything shady.")
     print("Only scan hosts you are the admin of or specifically have permission to scan.")
@@ -181,7 +190,9 @@ if __name__ == "__main__":
                 timeout_val = 1.0
 
             # Kör skanningen och samla resultatrader
-            result_lines = scan_ports(target_host, start, end, timeout=timeout_val, presentation=presentation)
+            result_lines, scanned_ports = scan_ports(target_host, start, end, timeout=timeout_val, presentation=presentation)
+
+            print(f"\nScanned ports: {start} to {end} on host {target_host}\n")
 
             # Alternativ för att logga resultatet i en text-fil
             save_choice = input("Would you like to save the results to a file? (y/n): ").lower().strip()
