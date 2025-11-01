@@ -1,19 +1,47 @@
-###### PORT SCANNER DELUXE MED EXTRA MYCKET STARK SÅS ######
+# portscanner_colored_full.py
+"""
+Improved, colorized port scanner with a compact single-line progress display.
+Requires: colorama
+Install: python3 -m pip install colorama
+
+Usage: python3 portscanner_colored_full.py
+Only scan hosts you own or have explicit permission to test.
+"""
 
 import socket
 import sys
-from typing import Tuple
+from typing import Tuple, List
 import time
 from datetime import datetime
+import textwrap
+from colorama import init, Fore, Style
 
-print("Use this tool only on systems you own or are authorized to test.\nUnauthorized scanning is prohibited and may be illegal.\nFor safe test targets, use hosts like scanme.nmap.org.")
+# Initialize colorama (autoreset so colors won't "leak")
+init(autoreset=True)
 
-# funktion för att proba sockets efter tjänster.
+# Color constants
+C_HEAD = Fore.CYAN + Style.BRIGHT
+C_OK = Fore.GREEN + Style.BRIGHT
+C_FAIL = Fore.RED + Style.BRIGHT
+C_WARN = Fore.YELLOW + Style.BRIGHT
+C_ERR = Fore.MAGENTA + Style.BRIGHT
+C_DIM = Style.DIM
+C_RESET = Style.RESET_ALL
+
+# Short helper for safe banner truncation
+def shorten_banner(banner: str, width: int = 60) -> str:
+    if not banner:
+        return ""
+    single = banner.splitlines()[0]
+    return textwrap.shorten(single, width=width, placeholder="...")
+
 
 def id_service(target: str, port: int, timeout: float = 1.0) -> Tuple[str, str]:
+    """Probe a port and attempt to identify the service by banner or well-known port.
+    Returns: (banner, guessed_service)
+    """
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(timeout)
-
     try:
         result = sock.connect_ex((target, port))
         if result != 0:
@@ -35,11 +63,10 @@ def id_service(target: str, port: int, timeout: float = 1.0) -> Tuple[str, str]:
                 110: b"\r\n",
                 143: b"\r\n",
             }
-
             probe = probes.get(port, b"\r\n")
             try:
                 sock.sendall(probe)
-                time.sleep(0.2)
+                time.sleep(0.18)
                 data = sock.recv(4096)
             except socket.timeout:
                 data = b""
@@ -54,7 +81,7 @@ def id_service(target: str, port: int, timeout: float = 1.0) -> Tuple[str, str]:
         banner_lower = banner.lower()
         guessed = "unknown"
 
-        # Enkel heuristik för gissning
+        # Simple heuristics
         if "ssh-" in banner_lower or port == 22:
             guessed = "SSH"
         elif "http/" in banner_lower or "server:" in banner_lower or port in (80, 8080, 8000, 443):
@@ -82,30 +109,58 @@ def id_service(target: str, port: int, timeout: float = 1.0) -> Tuple[str, str]:
         sock.close()
 
 
-# Nästa funktion ska returnera resultatet. 
+def color_for_status(status: str) -> str:
+    if status == "OPEN":
+        return C_OK
+    elif status == "CLOSED":
+        return C_FAIL
+    elif status == "ERROR":
+        return C_ERR
+    else:
+        return Fore.WHITE
 
-def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presentation: str = "all"): 
-    results = [] 
 
-    print(f"Scanning {target} from port {start} to {end}.\nTimeout set to: {timeout} ")
-    
-def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presentation: str = "all"): 
-    results = [] 
-    open_results = []
-    closed_results = []
-    error_results = []
+def format_header(target: str, start: int, end: int, timeout: float) -> None:
+    # A nicer boxed header with aligned fields
+    now = datetime.now().replace(microsecond=0)
+    box_width = 66
+    title = "PORT SCANNER"
+    print(C_HEAD + "+" + "=" * (box_width - 2) + "+")
+    print(C_HEAD + "|" + title.center(box_width - 2) + "|")
+    print(C_HEAD + "|" + f" Target: {target}".ljust(box_width - 2) + "|")
+    print(C_HEAD + "|" + f" Ports: {start}-{end}".ljust(box_width - 2) + "|")
+    print(C_HEAD + "|" + f" Timeout: {timeout} s".ljust(box_width - 2) + "|")
+    print(C_HEAD + "|" + f" Started: {now.isoformat(' ')}".ljust(box_width - 2) + "|")
+    print(C_HEAD + "+" + "=" * (box_width - 2) + "+" + C_RESET)
 
-    # Header till användaren
-    print(f"\nNätverksskanner v1.0")
-    print("="*50)
-    print(f"Mål: {target}")
-    print(f"Portintervall: {start}-{end}")
-    print(f"Timeout: {timeout} sekund(er)")
-    print("="*50)
+
+def print_single_line_progress(current: int, total: int, elapsed: float, open_count: int, last_open: str, bar_length: int = 30) -> None:
+    percent = (current / total) * 100
+    filled_len = int(round(bar_length * current / float(total)))
+    bar = "█" * filled_len + "░" * (bar_length - filled_len)
+    elapsed_str = time.strftime('%H:%M:%S', time.gmtime(int(elapsed)))
+    # Compose a compact single-line status. It will overwrite itself via \r.
+    extra = f" | Open: {open_count}"
+    if last_open:
+        extra += f" (last: {last_open})"
+    print(f"\r{C_WARN}Scanning [{bar}] {percent:6.2f}% ({current}/{total}) Elapsed: {elapsed_str}{extra}{C_RESET}", end="", flush=True)
+
+
+def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presentation: str = "all") -> List[str]:
+    """Scan ports from start to end (inclusive). Returns a list of plain text result lines (no color codes) for saving."""
+    results: List[str] = []
+    open_results: List[tuple] = []
+    closed_results: List[int] = []
+    error_results: List[tuple] = []
 
     total_ports = end - start + 1
-    bar_length = 25  # längre progress-bar
+    bar_length = 36
     start_time = time.time()
+
+    format_header(target, start, end, timeout)
+
+    open_count = 0
+    last_open_display = ""
 
     for port in range(start, end + 1):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -114,58 +169,70 @@ def scan_ports(target: str, start: int, end: int, timeout: float = 1.0, presenta
             res = sock.connect_ex((target, port))
             if res == 0:
                 banner, service = id_service(target, port, timeout=timeout)
-                if banner:
-                    line = f"Port {port} [ÖPPEN] - {service} ({banner.splitlines()[0] if banner.splitlines() else banner})"
-                else:
-                    line = f"Port {port} [ÖPPEN] - {service} (Ingen banner)"
-                open_results.append(line)
-                results.append(line)
+                status = "OPEN"
+                short = shorten_banner(banner, width=58)
+                line_plain = f"Port {port} [OPEN] - {service} - {short}"
+                open_results.append((port, service, short))
+                results.append(line_plain)
+                open_count += 1
+                last_open_display = f"{port}/{service}"
             else:
-                line = f"Port {port} [STÄNGD]"
-                if presentation == "all":
-                    print(line)
-                closed_results.append(line)
-                results.append(line)
+                line_plain = f"Port {port} [CLOSED]"
+                closed_results.append(port)
+                results.append(line_plain)
         except Exception as e:
-            line = f"Port {port} [FEL] - {e}"
-            error_results.append(line)
-            results.append(line)
+            line_plain = f"Port {port} [ERROR] - {e}"
+            error_results.append((port, str(e)))
+            results.append(line_plain)
         finally:
             sock.close()
 
-        # Progress-bar
+        # single-line progress update
         current = port - start + 1
-        percent = (current / total_ports) * 100
-        filled_len = int(round(bar_length * current / float(total_ports)))
-        bar = "█" * filled_len + "░" * (bar_length - filled_len)
-        print(f"\rSkannar... [{bar}] {percent:5.1f}% ({current}/{total_ports})", end="")
+        elapsed = time.time() - start_time
+        print_single_line_progress(current, total_ports, elapsed, open_count, last_open_display, bar_length)
 
-    # Slut på skanning
-    print("\n\nSkanning klar!")
+    # finish
     elapsed = time.time() - start_time
+    print()  # newline after progress
+    print(C_OK + "\nScan finished" + C_RESET)
 
-    # Resultatvisning
-    print("\nResultat:")
-    print("-"*50)
-    for line in open_results:
-        print(line)
+    # Pretty results block
+    print(C_HEAD + "\nRESULTS".center(66) + C_RESET)
+    print(C_HEAD + "-" * 66 + C_RESET)
+
+    if open_results:
+        print(C_OK + "Open ports:" + C_RESET)
+        print(C_OK + "{:<7} {:<12} {:<60}".format("PORT", "SERVICE", "BANNER") + C_RESET)
+        for port, service, short in open_results:
+            print(C_OK + "{:<7} {:<12} {:<60}".format(port, service, short) + C_RESET)
+    else:
+        print(C_WARN + "No open ports found." + C_RESET)
+
     if presentation == "all":
-        for line in closed_results + error_results:
-            print(line)
+        if closed_results:
+            print(C_FAIL + "\nClosed ports (sample):" + C_RESET)
+            sample = closed_results[:200]
+            print(C_FAIL + ", ".join(str(p) for p in sample) + ("..." if len(closed_results) > len(sample) else "") + C_RESET)
 
-    print("="*50)
-    print(f"Skanning slutförd på {elapsed:.1f} sekunder")
-    print(f"{len(open_results)} öppna portar hittades")
+        if error_results:
+            print(C_ERR + "\nErrors during scan:" + C_RESET)
+            for port, err in error_results:
+                print(C_ERR + f"{port}: {err}" + C_RESET)
+
+    print(C_HEAD + "=" * 66 + C_RESET)
+    print(f"Elapsed time: {time.strftime('%H:%M:%S', time.gmtime(int(elapsed)))}")
+    print(f"Open ports found: {len(open_results)}")
     footer = f"[Scan complete. End time: {datetime.now().replace(microsecond=0)}]"
-    results.append(footer)
-    print(footer)
+    print(C_ERR + footer + C_RESET)
 
+    # return plain lines (no color) for file saving
+    results.append(footer)
     return results
 
 
 def save_results_to_file(lines, filename=None):
     if not filename:
-        # Använd säker timestamp för filnamn (inga kolon eller mellanslag)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"portscan_{timestamp}.txt"
 
@@ -173,14 +240,12 @@ def save_results_to_file(lines, filename=None):
         with open(filename, "w", encoding="utf-8") as f:
             for line in lines:
                 f.write(line + "\n")
-        print(f"Results saved to: {filename}")
+        print(C_OK + f"Results saved to: {filename}" + C_RESET)
     except Exception as e:
-        print(f"Could not save file: {e}")
+        print(C_ERR + f"Could not save file: {e}" + C_RESET)
+
 
 def get_int_input(prompt, default=None, minval=0, maxval=65535):
-    """
-    Hjälpfunktion för att läsa integer från input och validera intervallet.
-    """
     while True:
         val = input(prompt).strip()
         if val == "" and default is not None:
@@ -188,58 +253,51 @@ def get_int_input(prompt, default=None, minval=0, maxval=65535):
         try:
             iv = int(val)
             if iv < minval or iv > maxval:
-                print(f"Enter a number between {minval} and {maxval}.")
+                print(C_WARN + f"Enter a number between {minval} and {maxval}." + C_RESET)
                 continue
             return iv
         except ValueError:
-            print("Please enter a valid number.")
+            print(C_WARN + "Please enter a valid number." + C_RESET)
 
 
 if __name__ == "__main__":
-    print(" ")
-    print("##########################################################")
-    print("###### Welcome to Kabelkramarnas fancy Port-Scanner ######")
-    print("##########################################################")
-    print(" ")
-    print("We do not take responsibility for this scanner being used for anything shady.")
-    print("Only scan hosts you are the admin of or specifically have permission to scan.")
-    print("For scanning remote targets please use scanme.nmap.org or similar URLs used för testing.")
-    print(" ")
+    print("\n##########################################################")
+    print("######       Welcome to the Fancy Port Scanner       #####")
+    print("##########################################################\n")
+    print(C_WARN + "Only scan hosts you own or have explicit permission to test.")
+    print("For safe test targets, use scanme.nmap.org or similar test hosts.\n" + C_RESET)
 
     try:
         while True:
-            target_host = input("Select a target host to scan using either URL or IP-adress: ").strip()
-            start = get_int_input("Define port scan range from port (enter port number): ")
-            end = get_int_input("To port: ")
+            target_host = input("Target host (IP or domain) [default: scanme.nmap.org]: ").strip() or "scanme.nmap.org"
+            start = get_int_input("Start port (1-1024) [default 1]: ", default=1, minval=0, maxval=1024)
+            end = get_int_input("End port (1-1024) [default 1024]: ", default=1024, minval=0, maxval=1024)
             if end < start:
-                print("End port must be a higher number than start port. Please try again.")
+                print(C_WARN + "End port must be greater than or equal to start port. Please try again." + C_RESET)
                 continue
 
-            presentation = input("Type ALL to show result of every port or OPEN to only show open ports: ").lower().strip()
+            presentation = input("Show ALL ports or only OPEN ports? (all/open) [default: open]: ").lower().strip() or "open"
             if presentation not in ("all", "open"):
-                print("Invalid presentation choice, defaulting to ALL.")
-                presentation = "all"
+                print(C_WARN + "Invalid choice, defaulting to 'open'." + C_RESET)
+                presentation = "open"
 
-            timeout = input("Set a timeout for each port in seconds. Use '.' for a decimal (press Enter for default 1s): ").strip()
+            timeout = input("Timeout per port in seconds (e.g. 0.5) [default 1.0]: ").strip() or "1.0"
             try:
-                timeout_val = float(timeout) if timeout else 1.0
+                timeout_val = float(timeout)
             except ValueError:
                 timeout_val = 1.0
 
-            # Kör skanningen och samla resultatrader
             result_lines = scan_ports(target_host, start, end, timeout=timeout_val, presentation=presentation)
 
-            # Alternativ för att logga resultatet i en text-fil
-            save_choice = input("Would you like to save the results to a file? (y/n): ").lower().strip()
+            save_choice = input("Save results to file? (y/n) [default: n]: ").lower().strip() or "n"
             if save_choice == "y":
-                fname = input("Enter filename (or press Enter to auto-generate): ").strip()
-                save_results_to_file(result_lines, fname if fname else None)
+                fname = input("Enter filename (or press Enter to auto-generate): ").strip() or None
+                save_results_to_file(result_lines, fname)
 
-            # Fråga om ny skanning
-            again = input("Would you like to scan a new range of ports? (y/n): ").lower().strip()
+            again = input("Scan another target/range? (y/n) [default: n]: ").lower().strip() or "n"
             if again != "y":
-                print("Exiting program.\nThanks for doing some shady stuff with us.\nRemember to scan responsibly!")
+                print(C_HEAD + "Exiting. Scan responsibly!" + C_RESET)
                 break
 
     except KeyboardInterrupt:
-        print("\nUser interrupted. Shutting down.")
+        print("\n" + C_WARN + "User interrupted. Shutting down." + C_RESET)
